@@ -99,7 +99,6 @@ class Postman extends Command
                     ], substr($info->getPathname(), $length));
                 try {
                     $data[] = $this->controller($className);
-                    break;
                 } catch(\Exception $e) {
                     continue;
                 }
@@ -166,7 +165,6 @@ class Postman extends Command
             // 3. method explain
             try {
                 $data[] = $this->methodsEach($method, $prefix);
-                break;
             } catch(\Throwable $e) {
                 continue;
             }
@@ -185,7 +183,7 @@ class Postman extends Command
         $info = (new Info())->run($method);
         return [
             'name' => $info->name,
-            'event' => $this->methodsEvent($method),
+            'event' => $this->methodsEvent($method, $info),
             'request' => $this->methodsRequest($method, $info, $prefix),
             'response' => $this->methodsResponse($method)
         ];
@@ -196,9 +194,21 @@ class Postman extends Command
      * @param \ReflectionMethod $method
      * @return array
      */
-    private function methodsEvent(\ReflectionMethod $method)
+    private function methodsEvent(\ReflectionMethod $method, Info $info)
     {
-        return [];
+        return [
+            [
+                'listen' => 'test',
+                'script' => [
+                    'type' => 'text/javascript',
+                    'exec' => [
+                        'pm.test("'.$info->name.'", function(){',
+                        '    pm.response.to.be.ok;',
+                        '});'
+                    ]
+                ]
+            ]
+        ];
     }
 
     /**
@@ -229,6 +239,10 @@ class Postman extends Command
         if ($outputMarkdown !== '') {
             $description .= $this->ln.$this->ln."### 出参".$this->ln.$this->ln;
             $description .= $outputMarkdown;
+            $description .= $this->ln.$this->ln."### 示例".$this->ln.$this->ln;
+            $description .= '```json'.$this->ln;
+            $description .= $output->jsonRawBody;
+            $description .= $this->ln.'```'.$this->ln;
         }
         // 4. JSON结构
         $data = [

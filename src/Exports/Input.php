@@ -11,8 +11,6 @@ namespace Uniondrug\Postman\Exports;
  */
 class Input extends Base
 {
-    public $path = '/';
-    public $method = 'GET';
     public $markdown = '';
     public $jsonRawBody = '{}';
 
@@ -24,30 +22,6 @@ class Input extends Base
     {
         $comment = $method->getDocComment();
         if (is_string($comment) && $comment !== '') {
-            // 1. route
-            preg_match("/@(Route|Get|Post|Patch|Put|Delete|Options|Head)\s*\(([\)]*)\)/i", $comment, $m);
-            if (count($m) > 0) {
-                // 1.1 method
-                $m[1] = strtoupper($m[1]);
-                if ($m[1] !== 'ROUTE') {
-                    $this->method = $m[1];
-                }
-                // 1.2 path
-                $m[2] = trim(preg_replace([
-                    "/'|\"/",
-                    "/[\/]+$/"
-                ], [
-                    '',
-                    ''
-                ], $m[1]));
-                if ($m[2] !== '') {
-                    if ($m[2][0] !== '/') {
-                        $m[2] = '/'.$m[2];
-                    }
-                    $this->path = $m[2];
-                }
-            }
-            // 2. input
             $this->parser($comment);
         }
         return $this;
@@ -58,7 +32,8 @@ class Input extends Base
         return $this->jsonRawBody;
     }
 
-    public function toMarkdown(){
+    public function toMarkdown()
+    {
         return $this->markdown;
     }
 

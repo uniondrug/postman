@@ -68,7 +68,7 @@ class Struct extends Base
     public function jsonRawBody()
     {
         $data = $this->toArray();
-        return json_encode($data, true);
+        return json_encode($data, JSON_PRETTY_PRINT);
     }
 
     public function markdown()

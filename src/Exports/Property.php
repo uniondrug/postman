@@ -37,14 +37,18 @@ class Property extends Base
      * 默认值
      * @return mixed
      */
-    public function defaultValue(){
-
+    public function defaultValue()
+    {
         $value = '';
-        switch ($this->type){
+        switch ($this->type) {
             case 'int' :
-            case 'integer' : $value = '0'; break;
+            case 'integer' :
+                $value = '0';
+                break;
             case 'float' :
-            case 'double' : $value = '0.0'; break;
+            case 'double' :
+                $value = '0.0';
+                break;
         }
         return $value;
     }
@@ -58,18 +62,16 @@ class Property extends Base
     {
         $text = "";
         if ($i === 0) {
-            $text .= "> {{".$index.'}} '.$this->class.$this->ln.$this->ln;
+            $text .= '> '.$this->class.$this->ln.$this->ln;
             $text .= "| 必须 | 类型 | 字段 | 描述 |".$this->ln;
             $text .= "| -- | -- | -- | :-- |".$this->ln;
         }
-
-        preg_match("/([_a-zA-Z0-9]+)$/", $this->type, $matchType);
-        $type = $matchType[1];
+        $type = preg_replace("/^[\\\\]+/", '', $this->type);
         if ($this->isArray) {
             $type = "{$type}[]";
         }
         if ($this->isStruct) {
-            $type = "{{{$this->index}}} `{$type}`";
+            $type = "`{$type}`";
         }
         $text .= "| ".($this->required ? 'YES' : '-')." | {$type} | {$this->name} | {$this->message} |".$this->ln;
         return $text;
