@@ -114,9 +114,10 @@ class Postman extends Command
     private function baseInfo()
     {
         $description = '> '.$this->baseConf->description;
-        $description .= "\\\n\\\n";
-        $description .= "部署: ".$this->baseConf->host."\\\n";
-        $description .= "更新: ".date('Y-m-d H:i')."\\\n";
+        $description .= $this->ln.$this->ln;
+        $description .= "* 监权 : `".(($this->baseConf->auth === 'YES') ? '开启' : '关闭')."`".$this->ln;
+        $description .= "* 部署 : `{$this->baseConf->host}`".$this->ln;
+        $description .= "* 导出 : `".date('Y-m-d H:i')."`";
         return [
             'name' => $this->baseConf->name,
             'description' => $description
@@ -134,9 +135,13 @@ class Postman extends Command
         try {
             $class = new \ReflectionClass($className);
             $info = (new Info())->run($class);
+            $description = $info->description;
+            $description .= $this->ln."* __prefix__ : `{$info->prefix}``";
+            $description .= $this->ln."* __class__ : `{$class->name}``";
+            $description .= $this->ln."* __file__ : `".substr($class->getFileName(), strlen($this->basePath) + 1)."`";
             return [
                 'name' => $info->name,
-                'description' => $info->description,
+                'description' => $description,
                 'item' => $this->methods($class, $info->prefix)
             ];
         } catch(\Throwable $e) {

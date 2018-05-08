@@ -45,12 +45,14 @@ class Info extends Base
                 }
             }
         }
+
         $this->name === '' && $this->name = $class->getShortName();
         $this->description === '' && $this->description = '> '.$class->getName();
         $this->description .= $this->ln.$this->ln;
+
         foreach ($this->tags as $tag => $value) {
             if ($value !== '') {
-                $this->description .= '1. `'.$tag.'` '.htmlspecialchars($value).$this->ln;
+                $this->description .= '* _'.$tag.'_ : `'.htmlspecialchars($value).'`'.$this->ln;
             }
         }
         return $this;
