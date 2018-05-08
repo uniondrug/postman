@@ -14,6 +14,7 @@ class Input extends Base
     public $path = '/';
     public $method = 'GET';
     public $markdown = '';
+    public $jsonRawBody = '{}';
 
     /**
      * @param \ReflectionMethod $method
@@ -26,14 +27,19 @@ class Input extends Base
             // 1. route
             preg_match("/@(Route|Get|Post|Patch|Put|Delete|Options|Head)\s*\(([\)]*)\)/i", $comment, $m);
             if (count($m) > 0) {
-                print_r ($m); exit;
                 // 1.1 method
                 $m[1] = strtoupper($m[1]);
                 if ($m[1] !== 'ROUTE') {
                     $this->method = $m[1];
                 }
                 // 1.2 path
-                $m[2] = trim(preg_replace(["/'|\"/", "/[\/]+$/"], ['', ''], $m[1]));
+                $m[2] = trim(preg_replace([
+                    "/'|\"/",
+                    "/[\/]+$/"
+                ], [
+                    '',
+                    ''
+                ], $m[1]));
                 if ($m[2] !== '') {
                     if ($m[2][0] !== '/') {
                         $m[2] = '/'.$m[2];
@@ -45,6 +51,15 @@ class Input extends Base
             $this->parser($comment);
         }
         return $this;
+    }
+
+    public function toJson()
+    {
+        return $this->jsonRawBody;
+    }
+
+    public function toMarkdown(){
+        return $this->markdown;
     }
 
     /**
@@ -63,6 +78,7 @@ class Input extends Base
             $struct = trim($m[1]);
             $export = new Struct($struct);
             $this->markdown = $export->markdown();
+            $this->jsonRawBody = $export->jsonRawBody();
         } catch(\Throwable $e) {
         }
     }

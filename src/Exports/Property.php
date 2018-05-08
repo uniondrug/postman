@@ -19,6 +19,7 @@ class Property extends Base
     public $value = null;
     public $message = '';
     public $class = '';
+    public $index = 0;
 
     /**
      * Property constructor.
@@ -33,24 +34,42 @@ class Property extends Base
     }
 
     /**
+     * 默认值
+     * @return mixed
+     */
+    public function defaultValue(){
+
+        $value = '';
+        switch ($this->type){
+            case 'int' :
+            case 'integer' : $value = '0'; break;
+            case 'float' :
+            case 'double' : $value = '0.0'; break;
+        }
+        return $value;
+    }
+
+    /**
      * 转为Markdown格式
      * @param int $i
      * @return string
      */
-    public function toMarkdown($i = 0)
+    public function toMarkdown($i = 0, $index = 0)
     {
         $text = "";
         if ($i === 0) {
-            $text .= "### ".$this->class.$this->ln;
+            $text .= "> {{".$index.'}} '.$this->class.$this->ln.$this->ln;
             $text .= "| 必须 | 类型 | 字段 | 描述 |".$this->ln;
             $text .= "| -- | -- | -- | :-- |".$this->ln;
         }
-        $type = $this->type;
+
+        preg_match("/([_a-zA-Z0-9]+)$/", $this->type, $matchType);
+        $type = $matchType[1];
         if ($this->isArray) {
             $type = "{$type}[]";
         }
         if ($this->isStruct) {
-            $type = "`{$type}`";
+            $type = "{{{$this->index}}} `{$type}`";
         }
         $text .= "| ".($this->required ? 'YES' : '-')." | {$type} | {$this->name} | {$this->message} |".$this->ln;
         return $text;
@@ -88,7 +107,7 @@ class Property extends Base
             }
             // 2.3 struct nest
             $this->type = $t[1];
-            preg_match("/^([A-Z])/", $t[1], $ts);
+            preg_match("/([A-Z])/", $t[1], $ts);
             if (count($ts) > 0) {
                 $this->isStruct = true;
                 if ($this->type[0] !== '\\') {

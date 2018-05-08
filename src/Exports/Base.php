@@ -7,5 +7,8 @@ namespace Uniondrug\Postman\Exports;
 
 abstract class Base
 {
+    public $schema = '{{protocol}}';
+    public $domain = '{{domain}}';
+
     public $ln = "\n";
 }

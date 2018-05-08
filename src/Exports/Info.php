@@ -12,7 +12,7 @@ namespace Uniondrug\Postman\Exports;
 class Info extends Base
 {
     public $name = '';
-    public $method = '';
+    public $method = 'GET';
     public $prefix = '';
     public $path = '';
     public $description = '';
@@ -22,6 +22,12 @@ class Info extends Base
         'autor' => '',
         'date' => ''
     ];
+
+    public function isPost(){
+        return in_array($this->method, [
+            'DELETE', 'PATCH', 'POST', 'PUT'
+        ]);
+    }
 
     /**
      * @param \ReflectionClass|\ReflectionMethod $class
@@ -101,7 +107,7 @@ class Info extends Base
         if (count($m) > 0) {
             // 1.1 method
             $m[1] = strtoupper($m[1]);
-            if ($m[1] !== 'ROUTE' || $m[1] !== 'ROUTEPREFIX') {
+            if ($m[1] !== 'ROUTE' && $m[1] !== 'ROUTEPREFIX') {
                 $this->method = $m[1];
             }
             // 1.2 path

@@ -40,7 +40,7 @@ class Postman extends Command
      */
     public function handle()
     {
-        $this->basePath = realpath(__DIR__.'/../../../../../');
+        $this->basePath = getcwd(); //realpath(__DIR__.'/../../../../../');
         $this->controllerPath = $this->basePath.'/app/Controllers';
         $this->prepare();
         $result = [
@@ -99,6 +99,7 @@ class Postman extends Command
                     ], substr($info->getPathname(), $length));
                 try {
                     $data[] = $this->controller($className);
+                    break;
                 } catch(\Exception $e) {
                     continue;
                 }
@@ -165,6 +166,7 @@ class Postman extends Command
             // 3. method explain
             try {
                 $data[] = $this->methodsEach($method, $prefix);
+                break;
             } catch(\Throwable $e) {
                 continue;
             }
@@ -175,7 +177,7 @@ class Postman extends Command
     /**
      * 单个方法解析
      * @param \ReflectionMethod $method
-     * @param string           $prefix
+     * @param string            $prefix
      * @return array
      */
     private function methodsEach(\ReflectionMethod $method, $prefix)
@@ -189,11 +191,23 @@ class Postman extends Command
         ];
     }
 
+    /**
+     * 可执行脚本
+     * @param \ReflectionMethod $method
+     * @return array
+     */
     private function methodsEvent(\ReflectionMethod $method)
     {
         return [];
     }
 
+    /**
+     * 请求参数
+     * @param \ReflectionMethod $method
+     * @param Info              $info
+     * @param                   $prefix
+     * @return array
+     */
     private function methodsRequest(\ReflectionMethod $method, Info $info, $prefix)
     {
         // 1. basic
@@ -217,9 +231,52 @@ class Postman extends Command
             $description .= $outputMarkdown;
         }
         // 4. JSON结构
-        return [
+        $data = [
+            'url' => $this->methodsRequestUrl($info, $prefix.$info->path),
+            'method' => $info->method,
             'description' => $description
         ];
+        if ($this->baseConf->auth) {
+            $data['auth'] = $this->mothodsRequestAuth($info);
+        }
+        if ($info->isPost()) {
+            $data['body'] = $this->mothodsRequestBody($input);
+        }
+        return $data;
+    }
+
+    private function mothodsRequestAuth(Info $info)
+    {
+        return [
+            'type' => 'bearer',
+            'bearer' => [
+                [
+                    "key" => "token",
+                    "value" => "{{token}}",
+                    "type" => "string"
+                ]
+            ]
+        ];
+    }
+
+    private function mothodsRequestBody(Input $input)
+    {
+        return [
+            'mode' => 'raw',
+            'raw' => $input->toJson()
+        ];
+    }
+
+    private function methodsRequestUrl(Info $info, $path)
+    {
+        $host = $this->baseConf->host.'.'.$info->domain;
+        $data = [
+            'raw' => $info->schema.'://'.$host.$path,
+            'protocol' => $info->schema,
+            'host' => explode('.', $host),
+            'path' => explode('/', substr($path, 1))
+        ];
+        return $data;
     }
 
     private function methodsResponse(\ReflectionMethod $method)
