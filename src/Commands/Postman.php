@@ -26,8 +26,8 @@ class Postman extends Command
         $path = getcwd();
         $collection = new Collection($path);
         $collection->parser();
-        $this->asMarkdown($collection);
-//        $this->asPostman($collection);
+//        $this->asMarkdown($collection);
+        $this->asPostman($collection);
     }
 
     private function asMarkdown(Collection $collection)
