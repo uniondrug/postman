@@ -26,7 +26,7 @@ class Postman extends Command
         $path = getcwd();
         $collection = new Collection($path);
         $collection->parser();
-//        $this->asMarkdown($collection);
+        $this->asMarkdown($collection);
         $this->asPostman($collection);
     }
 
@@ -35,16 +35,9 @@ class Postman extends Command
         $collection->toMarkdown();
     }
 
-
     private function asPostman(Collection $collection)
     {
         $contents = $collection->toPostman();
-        if ($fp = @fopen('/Users/fuyibing/Desktop/export.json', 'wb+')) {
-            fwrite($fp, $contents);
-            fclose($fp);
-            echo "[Exported]\n";
-            exit;
-        }
-        echo $contents;
+        $collection->saveMarkdown($collection->basePath.'/'.$collection->publishPostmanTo, 'postman.json', $contents);
     }
 }

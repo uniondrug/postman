@@ -20,6 +20,7 @@ class Collection extends Base
      * @var bool
      */
     public $publishTo = 'docs/api';
+    public $publishPostmanTo = 'docs';
     /**
      * 名称
      * @var string
