@@ -14,23 +14,37 @@ use Uniondrug\Postman\Parsers\Collection;
  */
 class Postman extends Command
 {
+    protected $signature = 'postman
+                            {--mode=api : 发布markdown文档}
+                            {--path=docs/api : markdown文档存储位置}';
+
     /**
      * @inheritdoc
      */
     public function handle()
     {
         $path = getcwd();
-        $postman = new Collection($path);
-        $postman->parser();
-        $contents = $postman->toPostman();
+        $collection = new Collection($path);
+        $collection->parser();
+        $this->asMarkdown($collection);
+//        $this->asPostman($collection);
+    }
 
+    private function asMarkdown(Collection $collection)
+    {
+        $collection->toMarkdown();
+    }
+
+
+    private function asPostman(Collection $collection)
+    {
+        $contents = $collection->toPostman();
         if ($fp = @fopen('/Users/fuyibing/Desktop/export.json', 'wb+')) {
             fwrite($fp, $contents);
             fclose($fp);
             echo "[Exported]\n";
             exit;
         }
-
         echo $contents;
     }
 }

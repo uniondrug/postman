@@ -19,7 +19,7 @@ class Collection extends Base
      * 是否发布文档
      * @var bool
      */
-    public $publishDocuments = true;
+    public $publishTo = 'docs/api';
     /**
      * 名称
      * @var string
@@ -100,8 +100,47 @@ class Collection extends Base
         return $this->codeMap;
     }
 
+    /**
+     * 发布Markdown文档
+     * 在Collectionk中发布README.md索引文档, 同时
+     * 触发Controller的文档发布
+     */
     public function toMarkdown()
     {
+        // 1. title
+        $text = '# '.$this->name;
+        // 2. description
+        if ($this->description !== '') {
+            $text .= $this->eol.$this->description;
+        }
+        // 3. information
+        $text .= $this->eol;
+        $text .= '* **鉴权** : `'.(strtoupper($this->auth) === 'YES' ? '开启' : '关闭').'`'.$this->crlf;
+        $text .= '* **域名** : `'.$this->schema.'://'.$this->host.'.'.$this->domain.'`'.$this->crlf;
+        $text .= '* **导出** : `'.date('Y-m-d H:i').'`';
+        // 4. index
+        $text .= $this->eol;
+        $text .= '### 接口目录'.$this->eol;
+        foreach ($this->controllers as $controller) {
+            $name = $controller->annotation->name;
+            $desc = preg_replace("/\n/", "", trim($controller->annotation->description));
+            $text .= '* ['.$name.'](./'.$controller->reflect->getShortName().'/README.md) : '.$desc.$this->crlf;
+            $apis = $controller->getIndex(false);
+            if ($apis !== ''){
+                $text .= $apis.$this->crlf;
+            }
+        }
+        // 5. code map
+        $text .= $this->eol;
+        $text .= '### 编码对照表';
+        $text .= $this->eol;
+        $text .= $this->getCodeMap();
+        // 6. save README.md
+        $this->saveMarkdown($this->basePath.'/'.$this->publishTo, 'README.md', $text);
+        // 7. trigger controllers
+        foreach ($this->controllers as $controller) {
+            $controller->toMarkdown();
+        }
     }
 
     /**

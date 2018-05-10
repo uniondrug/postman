@@ -75,6 +75,63 @@ class Controller extends Base
     }
 
     /**
+     * 读取索引
+     * @return string
+     */
+    public function getIndex($curr = false)
+    {
+        $text = '';
+        $comma = '';
+        $space = $curr ? '' : '    ';
+        $prefix = './'.($curr ? '' : $this->reflect->getShortName().'/');
+        foreach ($this->methods as $method) {
+            $name = $method->annotation->name;
+            $desc = preg_replace("/\n/", " ", trim($method->annotation->description));
+            $text .= $comma.$space.'* ['.$name.']('.$prefix.$method->reflect->getShortName().'.md) : '.$desc;
+            $comma = $this->crlf;
+        }
+        return $text;
+    }
+
+    /**
+     * 导出README.md文档
+     * 存为Markdown索引文档同时触发接口
+     */
+    public function toMarkdown()
+    {
+        $path = $this->collection->basePath.'/'.$this->collection->publishTo.'/'.$this->reflect->getShortName();
+        // 1. title
+        $text = '# '.$this->annotation->name;
+        // 2. description
+        $desc = $this->annotation->description;
+        if ($desc !== '') {
+            $text .= $this->eol.$desc;
+        }
+        // 3. information
+        $text .= $this->eol;
+        $text .= "* **接口** : `".count($this->methods)."` 个".$this->crlf;
+        $text .= "* **前缀** : `{$this->annotation->prefix}`".$this->crlf;
+        $text .= "* **类名** : `{$this->reflect->name}`".$this->crlf;
+        $text .= "* **文件** : `{$this->filename}`";
+        // 4. index
+        $text .= $this->eol;
+        $text .= '### 接口列表';
+        $text .= $this->eol;
+        $text .= $this->getIndex(true);
+        // 5. code map
+        $text .= $this->eol;
+        $text .= '### 编码对照表';
+        $text .= $this->eol;
+        $text .= $this->collection->getCodeMap();
+        // 6. save README.md
+        $this->saveMarkdown($path, 'README.md', $text);
+        // 7. 触发API
+        foreach ($this->methods as $method){
+            $method->toMarkdown();
+        }
+    }
+
+    /**
      * 转为POSTMAN文件
      * @return array
      */

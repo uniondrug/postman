@@ -81,10 +81,22 @@ class Method extends Base
     }
 
     /**
-     *
+     * 导出Markdown文档
      */
     public function toMarkdown()
     {
+        $text = '# '.$this->annotation->name.$this->eol;
+        $text .= $this->headerText();
+        $text .= $this->eol.$this->inputText();
+        $text .= $this->eol.$this->inputCode();
+        $text .= $this->eol.$this->outputText();
+        $text .= $this->eol.$this->outputCode();
+        $text .= $this->eol;
+        $text .= '### 编码对照表';
+        $text .= $this->eol;
+        $text .= $this->collection->getCodeMap();
+        $path = $this->collection->basePath.'/'.$this->collection->publishTo.'/'.$this->controller->reflect->getShortName();
+        $this->saveMarkdown($path, $this->reflect->getShortName().'.md', $text);
     }
 
     /**
