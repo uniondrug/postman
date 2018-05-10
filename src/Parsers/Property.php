@@ -6,6 +6,7 @@
 namespace Uniondrug\Postman\Parsers;
 
 use Uniondrug\Postman\Parsers\Abstracts\Base;
+use Uniondrug\Structs\StructInterface;
 
 /**
  * 解析属性
@@ -14,12 +15,13 @@ use Uniondrug\Postman\Parsers\Abstracts\Base;
 class Property extends Base
 {
     public $name;
+    public $value;
 
     /**
      * @param Method              $method
      * @param \ReflectionProperty $p
      */
-    public function __construct(Method $method, \ReflectionProperty $p)
+    public function __construct(Method $method, StructInterface $struct, \ReflectionProperty $p)
     {
         parent::__construct();
         $this->name = $p->name;
@@ -28,6 +30,18 @@ class Property extends Base
         $this->annotation->info();
         $this->annotation->type();
         $this->annotation->validator();
+        // 2. value
+        if (!$this->annotation->isStructType) {
+            if ($this->annotation->isArrayType) {
+                $this->value = '[]';
+            } else {
+                try {
+                    $this->value = $struct->{$p->name};
+                } catch(\Throwable $e) {
+                    $this->value = '?';
+                }
+            }
+        }
     }
 
     /**

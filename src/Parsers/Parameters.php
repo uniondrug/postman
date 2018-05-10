@@ -32,10 +32,11 @@ class Parameters
     public $reflect;
     private static $inputColumns = [
         'required' => '必须',
-        'filterType' => '类型',
+        'type' => '类型',
         'name' => '字段',
-        'min' => '最小值',
-        'max' => '最大值',
+        'value' => '默认',
+        'filterType' => '入参格式',
+        'filterOption' => '入参要求',
         'desc' => '描述'
     ];
     private static $outputColumns = [
@@ -73,7 +74,8 @@ class Parameters
                 continue;
             }
             // 4.1 new Property
-            $property = new Property($method, $p);
+            $struct = new $cn(null, false);
+            $property = new Property($method, $struct, $p);
             if ($property->annotation->isStructType) {
                 $this->children[$p->name] = new Parameters($method, $property->annotation->type, $reflect->getNamespaceName());
             }
@@ -163,7 +165,7 @@ class Parameters
         if (method_exists($this, $m)) {
             return $this->{$m}($property);
         }
-        return 'x';
+        return '';
     }
 
     /**
@@ -173,7 +175,7 @@ class Parameters
     protected function withRequired($property)
     {
         $required = $property->annotation->validator !== null && $property->annotation->validator->required;
-        return $required ? 'YES' : '';
+        return $required ? '是' : '';
     }
 
     /**
@@ -210,7 +212,19 @@ class Parameters
         if ($property->annotation->validator !== null && $property->annotation->validator->type !== '') {
             return $property->annotation->validator->type;
         }
-        return $this->withType($property);
+        return '';
+    }
+
+    /**
+     * @param Property $property
+     * @return string
+     */
+    protected function withFilterOption($property)
+    {
+        if ($property->annotation->validator !== null && $property->annotation->validator->options !== '') {
+            return $property->annotation->validator->options;
+        }
+        return '';
     }
 
     /**
@@ -224,19 +238,9 @@ class Parameters
 
     /**
      * @param Property $property
-     * @return string
+     * @return mixed
      */
-    protected function withMax($property)
-    {
-        return '';
-    }
-
-    /**
-     * @param Property $property
-     * @return string
-     */
-    protected function withMin($property)
-    {
-        return '';
+    protected function withValue($property){
+        return $property->value;
     }
 }
