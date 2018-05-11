@@ -120,6 +120,10 @@ class Annotation extends Base
             $this->typeText = $this->name;
             if (count($info) > 0) {
                 $this->description = implode($this->crlf, $info);
+                $this->description = preg_replace("/\<[\/]?code\>/i",
+                    '```',
+                    $this->description
+                );
             }
         }
     }
@@ -287,8 +291,7 @@ class Annotation extends Base
         }
         $a = [];
         foreach (explode("\n", $s) as $x) {
-            $x = trim($x);
-            if ($x === '') {
+            if (trim($x) === '') {
                 continue;
             }
             $a[] = $x;

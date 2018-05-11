@@ -105,7 +105,7 @@ class Controller extends Base
         // 2. description
         $desc = $this->annotation->description;
         if ($desc !== '') {
-            $text .= $this->eol.$desc;
+            $text .= $this->eol.'> '.$desc;
         }
         // 3. information
         $text .= $this->eol;
