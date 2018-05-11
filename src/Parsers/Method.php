@@ -151,10 +151,10 @@ class Method extends Base
         }
         // url
         $data['url'] = [
-            'raw' => $this->schema.'://'.$this->collection->host.'.'.$this->domain.$this->annotation->path,
+            'raw' => $this->schema.'://'.$this->collection->host.'.'.$this->domain.$this->controller->annotation->prefix.$this->annotation->path,
             'protocol' => $this->schema,
             'host' => explode('.', $this->collection->host.'.'.$this->domain),
-            'path' => explode('/', substr($this->annotation->path, 1))
+            'path' => explode('/', substr($this->controller->annotation->prefix.$this->annotation->path, 1))
         ];
         // post body
         if ($this->annotation->isPostMethod) {

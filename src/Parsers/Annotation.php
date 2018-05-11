@@ -59,6 +59,7 @@ class Annotation extends Base
      * @var Validator
      */
     public $validator = null;
+    public $mock = '';
     /**
      * 是否为数组类型
      * @var bool
@@ -78,6 +79,7 @@ class Annotation extends Base
     ];
     private static $regexpInput = "/@Input[ ]+(\S+)/i";
     private static $regexpOutput = "/@Output[ ]+(\S+)/i";
+    private static $regexpMock = "/@Mock[ ]+([^\n]+)\n/i";
     private static $regexpPrefix = "/@RoutePrefix[ ]*\(([^\)]*)\)/i";
     private static $regexpRequest = "/@(Route|Get|Post|Put|Patch|Delete|Options|head)[ ]*\(([^\)]*)\)/i";
     private static $regexpType = "/@var[ ]+([_a-z0-9\\\]+)[ ]*([\[|\]| ]*)([^\n]*)\n/i";
@@ -254,6 +256,24 @@ class Annotation extends Base
         }
         // 3. parse
         $this->validator = new Validator($m[1]);
+    }
+
+    /**
+     * 解析Mock数据
+     */
+    public function mock()
+    {
+        // 1. not comment
+        if ($this->comment === false) {
+            return;
+        }
+        // 2. not defined
+        preg_match(self::$regexpMock, $this->comment, $m);
+        if (count($m) === 0) {
+            return;
+        }
+        // 3. parse
+        $this->mock = trim($m[1]);
     }
 
     /**

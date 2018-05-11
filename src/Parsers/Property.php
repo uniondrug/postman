@@ -30,6 +30,7 @@ class Property extends Base
         $this->annotation->info();
         $this->annotation->type();
         $this->annotation->validator();
+        $this->annotation->mock();
         // 2. value
         if (!$this->annotation->isStructType) {
             if ($this->annotation->isArrayType) {
