@@ -85,17 +85,26 @@ class Parameters
     }
 
     /**
+     * @param boolean $mock 是否填充MOCK数据
      * @return array
      */
-    public function toArray()
+    public function toArray($mock = true)
     {
         $data = [];
         foreach ($this->properties as $property) {
             if ($property->annotation->isStructType) {
                 $p = $this->children[$property->name];
-                $data[$property->name] = $p->toArray();
+                if ($property->annotation->isArrayType) {
+                    $data[$property->name] = [$p->toArray($mock)];
+                } else {
+                    $data[$property->name] = $p->toArray($mock);
+                }
             } else {
-                $data[$property->name] = $property->annotation->isArrayType ? [$property->defaultValue()] : $property->defaultValue();
+                $value = $property->annotation->mock;
+                if ($value === '') {
+                    $value = $property->defaultValue();
+                }
+                $data[$property->name] = $property->annotation->isArrayType ? [$value] : $value;
             }
         }
         return $this->isArray ? [$data] : $data;
@@ -240,7 +249,8 @@ class Parameters
      * @param Property $property
      * @return mixed
      */
-    protected function withValue($property){
+    protected function withValue($property)
+    {
         return $property->value;
     }
 }

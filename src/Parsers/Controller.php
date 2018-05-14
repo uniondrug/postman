@@ -105,7 +105,7 @@ class Controller extends Base
         // 2. description
         $desc = $this->annotation->description;
         if ($desc !== '') {
-            $text .= $this->eol.$desc;
+            $text .= $this->eol.'> '.$desc;
         }
         // 3. information
         $text .= $this->eol;
@@ -126,7 +126,7 @@ class Controller extends Base
         // 6. save README.md
         $this->saveMarkdown($path, 'README.md', $text);
         // 7. 触发API
-        foreach ($this->methods as $method){
+        foreach ($this->methods as $method) {
             $method->toMarkdown();
         }
     }
