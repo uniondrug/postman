@@ -18,6 +18,7 @@ class Annotation extends Base
      * @var string
      */
     public $name = '';
+    public $aliasName = null;
     /**
      * 描述
      * @var string
@@ -71,6 +72,7 @@ class Annotation extends Base
      */
     private $comment = false;
     private $reflect;
+    private static $regexpAlias = "/@alias\s+([_a-z][_a-z0-9]*)/i";
     private static $regexpInfo = "/([^@]+)/i";
     private static $regexpInfoClears = [
         "/\/[\*]+/" => " *",
@@ -100,6 +102,27 @@ class Annotation extends Base
     }
 
     /**
+     * 字段名的别名支持
+     */
+    public function alias()
+    {
+        // 1. not comment
+        if ($this->comment === false) {
+            return;
+        }
+        // 2. not defined
+        preg_match(self::$regexpAlias, $this->comment, $m);
+        if (count($m) === 0) {
+            return;
+        }
+        // 3. info赋值
+        $aliasName = trim($m[1]);
+        if ($aliasName !== '') {
+            $this->aliasName = $aliasName;
+        }
+    }
+
+    /**
      * 解析name/description
      */
     public function info()
@@ -120,10 +143,7 @@ class Annotation extends Base
             $this->typeText = $this->name;
             if (count($info) > 0) {
                 $this->description = implode($this->crlf, $info);
-                $this->description = preg_replace("/\<[\/]?code\>/i",
-                    '```',
-                    $this->description
-                );
+                $this->description = preg_replace("/\<[\/]?code\>/i", '```', $this->description);
             }
         }
     }
