@@ -94,14 +94,14 @@ class Parameters
         foreach ($this->properties as $property) {
             if ($property->annotation->isStructType) {
                 $p = $this->children[$property->name];
-                if ($property->annotation->isArrayType){
+                if ($property->annotation->isArrayType) {
                     $data[$property->name] = [$p->toArray($mock)];
                 } else {
                     $data[$property->name] = $p->toArray($mock);
                 }
             } else {
                 $value = $property->annotation->mock;
-                if ($value === ''){
+                if ($value === '') {
                     $value = $property->defaultValue();
                 }
                 $data[$property->name] = $property->annotation->isArrayType ? [$value] : $value;
@@ -194,7 +194,7 @@ class Parameters
     protected function withName($property)
     {
         $name = $property->name;
-        if ($property->annotation->aliasName !== null && $property->annotation->aliasName !== ''){
+        if ($property->annotation->aliasName !== null && $property->annotation->aliasName !== '') {
             $name .= '<br />';
             $name .= '别名: '.$property->annotation->aliasName;
         }
@@ -226,7 +226,7 @@ class Parameters
         if ($property->annotation->validator !== null && $property->annotation->validator->type !== '') {
             return $property->annotation->validator->type;
         }
-        return '';
+        return $this->withType($property);
     }
 
     /**
@@ -247,7 +247,11 @@ class Parameters
      */
     protected function withDesc($property)
     {
-        return $property->annotation->typeText;
+        $desc = $property->annotation->typeText;
+        if ($property->annotation->description !== '') {
+            $desc .= '<br />'.preg_replace("/\n/", "<br />", $property->annotation->description);
+        }
+        return $desc;
     }
 
     /**
