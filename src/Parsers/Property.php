@@ -27,6 +27,7 @@ class Property extends Base
         $this->name = $p->name;
         // 1. annotation
         $this->annotation = new Annotation($p);
+        $this->annotation->alias();
         $this->annotation->info();
         $this->annotation->type();
         $this->annotation->validator();

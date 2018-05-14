@@ -94,14 +94,14 @@ class Parameters
         foreach ($this->properties as $property) {
             if ($property->annotation->isStructType) {
                 $p = $this->children[$property->name];
-                if ($property->annotation->isArrayType) {
+                if ($property->annotation->isArrayType){
                     $data[$property->name] = [$p->toArray($mock)];
                 } else {
                     $data[$property->name] = $p->toArray($mock);
                 }
             } else {
                 $value = $property->annotation->mock;
-                if ($value === '') {
+                if ($value === ''){
                     $value = $property->defaultValue();
                 }
                 $data[$property->name] = $property->annotation->isArrayType ? [$value] : $value;
@@ -193,7 +193,12 @@ class Parameters
      */
     protected function withName($property)
     {
-        return $property->name;
+        $name = $property->name;
+        if ($property->annotation->aliasName !== null && $property->annotation->aliasName !== ''){
+            $name .= '<br />';
+            $name .= '别名: '.$property->annotation->aliasName;
+        }
+        return $name;
     }
 
     /**
