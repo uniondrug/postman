@@ -92,6 +92,10 @@ class Parameters
     {
         $data = [];
         foreach ($this->properties as $property) {
+            // 1. 忽略计算属性
+            if ($property->annotation->isExecuted) {
+                continue;
+            }
             if ($property->annotation->isStructType) {
                 $p = $this->children[$property->name];
                 if ($property->annotation->isArrayType) {
@@ -119,6 +123,9 @@ class Parameters
         $text = '> '.$this->reflect->name.$this->method->eol;
         $text .= $this->thead($input).$this->method->crlf;
         foreach ($this->properties as $property) {
+            if ($property->annotation->isExecuted){
+                continue;
+            }
             $text .= $this->tbody($input, $property).$this->method->crlf;
         }
         // 2. nest level

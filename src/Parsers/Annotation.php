@@ -39,6 +39,7 @@ class Annotation extends Base
      * @var string
      */
     public $method = '';
+    public $isExecuted = false;
     public $isPostMethod = false;
     /**
      * 请求路径
@@ -73,6 +74,7 @@ class Annotation extends Base
     private $comment = false;
     private $reflect;
     private static $regexpAlias = "/@alias\s+([_a-z][_a-z0-9]*)/i";
+    private static $regexpExec = "/@(exec)[^a-z]*/i";
     private static $regexpInfo = "/([^@]+)/i";
     private static $regexpInfoClears = [
         "/\/[\*]+/" => " *",
@@ -272,6 +274,9 @@ class Annotation extends Base
         // 1. not comment
         if ($this->comment === false) {
             return;
+        }
+        if (preg_match(self::$regexpExec, $this->comment) > 0) {
+            $this->isExecuted = true;
         }
         // 2. not defined
         preg_match(self::$regexpValidator, $this->comment, $m);
