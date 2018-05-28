@@ -160,7 +160,7 @@ class Method extends Base
         if ($this->annotation->isPostMethod) {
             $body = '{}';
             if ($this->inputParameter !== null) {
-                $body = json_encode($this->inputParameter->toArray(), JSON_PRETTY_PRINT);
+                $body = json_encode($this->inputParameter->toArray(), JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
             }
             $data['body'] = [
                 'mode' => 'raw',
@@ -264,7 +264,7 @@ class Method extends Base
         // 2. json string
         $text .= '*示例*'.$this->eol;
         $text .= '```'.$this->crlf;
-        $text .= json_encode($this->inputParameter->toArray(), JSON_PRETTY_PRINT).$this->crlf;
+        $text .= json_encode($this->inputParameter->toArray(), JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE).$this->crlf;
         $text .= '```';
         return $text;
     }
@@ -307,7 +307,7 @@ class Method extends Base
         // 2. json string
         $text .= '*示例*'.$this->eol;
         $text .= '```'.$this->crlf;
-        $text .= json_encode($this->outputParameter->toArray(), JSON_PRETTY_PRINT).$this->crlf;
+        $text .= json_encode($this->outputParameter->toArray(), JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE).$this->crlf;
         $text .= '```';
         return $text;
     }

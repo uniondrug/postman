@@ -161,7 +161,7 @@ class Collection extends Base
         foreach ($this->controllers as $controller) {
             $data['item'][] = $controller->toPostman();
         }
-        return json_encode($data, JSON_PRETTY_PRINT);
+        return json_encode($data, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
     }
 
     /**
