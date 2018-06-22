@@ -74,7 +74,7 @@ class Parameters
                 continue;
             }
             // 4.1 new Property
-            $struct = new $cn(null, false);
+            $struct = new $cn([], false);
             $property = new Property($method, $struct, $p);
             if ($property->annotation->isStructType) {
                 $this->children[$p->name] = new Parameters($method, $property->annotation->type, $reflect->getNamespaceName());
