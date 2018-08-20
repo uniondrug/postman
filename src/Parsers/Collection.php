@@ -55,6 +55,7 @@ class Collection extends Base
 
     /**
      * Controller constructor.
+     *
      * @param string $path 项目路径
      */
     public function __construct(string $path)
@@ -84,6 +85,7 @@ class Collection extends Base
     public function parser()
     {
         foreach ($this->classMap as $class) {
+            $class = str_replace("/", "\\", $class);
             try {
                 $controller = new Controller($this, $class);
                 $controller->parser();
@@ -125,9 +127,10 @@ class Collection extends Base
         foreach ($this->controllers as $controller) {
             $name = $controller->annotation->name;
             $desc = preg_replace("/\n/", "", trim($controller->annotation->description));
-            $text .= '* ['.$name.'](./'.$controller->reflect->getShortName().'/README.md) : '.$desc.$this->crlf;
+            $url = str_replace('\\', '/', substr($controller->reflect->getName(), 16));
+            $text .= '* ['.$name.'](./'.$url.'/README.md) : '.$desc.$this->crlf;
             $apis = $controller->getIndex(false);
-            if ($apis !== ''){
+            if ($apis !== '') {
                 $text .= $apis.$this->crlf;
             }
         }
@@ -161,11 +164,12 @@ class Collection extends Base
         foreach ($this->controllers as $controller) {
             $data['item'][] = $controller->toPostman();
         }
-        return json_encode($data, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
+        return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 
     /**
      * 扫描Controller目录
+     *
      * @param string $path
      */
     private function scanner($path)

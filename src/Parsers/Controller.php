@@ -83,7 +83,8 @@ class Controller extends Base
         $text = '';
         $comma = '';
         $space = $curr ? '' : '    ';
-        $prefix = './'.($curr ? '' : $this->reflect->getShortName().'/');
+        $url = str_replace('\\', '/', substr($this->reflect->getName(), 16));
+        $prefix = './'.($curr ? '' : $url.'/');
         foreach ($this->methods as $method) {
             $name = $method->annotation->name;
             $desc = preg_replace("/\n/", " ", trim($method->annotation->description));
@@ -99,7 +100,8 @@ class Controller extends Base
      */
     public function toMarkdown()
     {
-        $path = $this->collection->basePath.'/'.$this->collection->publishTo.'/'.$this->reflect->getShortName();
+        $name = str_replace('\\', '/', substr($this->reflect->getName(), 16));
+        $path = $this->collection->basePath.'/'.$this->collection->publishTo.'/'.$name;
         // 1. title
         $text = '# '.$this->annotation->name;
         // 2. description
