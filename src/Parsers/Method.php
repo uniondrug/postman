@@ -36,6 +36,7 @@ class Method extends Base
 
     /**
      * Method constructor.
+     *
      * @param Collection        $collection
      * @param Controller        $controller
      * @param \ReflectionMethod $reflect
@@ -95,7 +96,8 @@ class Method extends Base
         $text .= '### 编码对照表';
         $text .= $this->eol;
         $text .= $this->collection->getCodeMap();
-        $path = $this->collection->basePath.'/'.$this->collection->publishTo.'/'.$this->controller->reflect->getShortName();
+        $name = str_replace('\\', '/', substr($this->controller->reflect->getName(), 16));
+        $path = $this->collection->basePath.'/'.$this->collection->publishTo.'/'.$name;
         $this->saveMarkdown($path, $this->reflect->getShortName().'.md', $text);
     }
 
@@ -160,7 +162,7 @@ class Method extends Base
         if ($this->annotation->isPostMethod) {
             $body = '{}';
             if ($this->inputParameter !== null) {
-                $body = json_encode($this->inputParameter->toArray(), JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE);
+                $body = json_encode($this->inputParameter->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
             }
             $data['body'] = [
                 'mode' => 'raw',
@@ -264,7 +266,7 @@ class Method extends Base
         // 2. json string
         $text .= '*示例*'.$this->eol;
         $text .= '```'.$this->crlf;
-        $text .= json_encode($this->inputParameter->toArray(), JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE).$this->crlf;
+        $text .= json_encode($this->inputParameter->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).$this->crlf;
         $text .= '```';
         return $text;
     }
@@ -307,7 +309,7 @@ class Method extends Base
         // 2. json string
         $text .= '*示例*'.$this->eol;
         $text .= '```'.$this->crlf;
-        $text .= json_encode($this->outputParameter->toArray(), JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE).$this->crlf;
+        $text .= json_encode($this->outputParameter->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE).$this->crlf;
         $text .= '```';
         return $text;
     }
