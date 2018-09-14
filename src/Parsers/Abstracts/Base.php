@@ -39,7 +39,7 @@ abstract class Base
         $file = $path.'/'.$name;
         try {
             if (!is_dir($path)) {
-                mkdir($path, 0777);
+                mkdir($path, 0777,true);
             }
             $fp = fopen($file, 'wb+');
             fwrite($fp, $contents);
