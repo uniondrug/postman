@@ -166,7 +166,7 @@ class Collection extends Base
             $controller->toMarkdown();
         }
         // 8. SDK
-        if ($this->sdkName === '') {
+        if ($this->sdkName !== '') {
             $this->sdkx->export();
         }
     }

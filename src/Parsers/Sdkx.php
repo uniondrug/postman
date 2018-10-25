@@ -32,14 +32,22 @@ class Sdkx extends Base
     public function add(string $name, string $method, string $path, string $title, string $description, string $linkTo)
     {
         $description = trim($description);
-        $description === '' || $description = "\n".'     * '.$description;
+        $text = "";
+        if ($description !== '') {
+            foreach (explode("\n", $description) as $desc) {
+                $desc = trim($desc);
+                if ($desc !== '') {
+                    $text .= "\n".'     * '.$desc;
+                }
+            }
+        }
         $key = strtolower($name);
         $this->names[$key] = [
             'FUNCTION' => $name,
             'METHOD' => $method,
             'PATH' => $path,
             'TITLE' => trim($title),
-            'DESCRIPTION' => $description,
+            'DESCRIPTION' => $text,
             'LINKTO' => $this->collection->sdkLink.'/'.$this->collection->publishTo.'/'.$linkTo
         ];
     }

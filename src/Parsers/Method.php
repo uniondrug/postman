@@ -243,7 +243,7 @@ class Method extends Base
             $text .= '*用法(1)*'.$this->eol;
             $text .= '```'.$this->crlf;
             $text .= '// 参数设置见入参段落'.$this->crlf;
-            $text .= '$body = []; // 详见入参段落'.$this->crlf;
+            $text .= '$body = []; // 入参'.$this->crlf;
             $text .= '$response = $this->serviceSdk->'.$this->collection->sdkName.'->'.$this->annotation->sdkName.'($body);'.$this->crlf;
             $text .= '```';
             $text .= $this->eol;
@@ -253,15 +253,15 @@ class Method extends Base
         $text .= '*用法(2)*'.$this->eol;
         $text .= '```'.$this->crlf;
         $text .= '// 参数设置见入参段落'.$this->crlf;
-        $text .= '$body = []; // 详见入参段落'.$this->crlf;
+        $text .= '$body = []; // 入参'.$this->crlf;
         $text .= '$response = $this->serviceSdk->'.strtolower($this->annotation->method);
         $text .= '("'.$host.'", $body);'.$this->crlf;
         $text .= '```'.$this->eol;
         // 2.3
         $text .= '*结果处理*'.$this->eol;
         $text .= '```'.$this->crlf;
-        $text .= '// 是否有错'.$this->crlf;
-        $text .= 'if ($sdk->hasError()){'.$this->crlf;
+        $text .= '// 任意一种用法拿到结果时'.$this->crlf;
+        $text .= 'if ($response->hasError()){'.$this->crlf;
         $text .= '    // 执行错误逻辑;'.$this->crlf;
         $text .= '}'.$this->crlf;
         // 5. p3

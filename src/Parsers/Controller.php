@@ -97,6 +97,9 @@ class Controller extends Base
             if ($method->annotation->ver !== '') {
                 $text .= " `{$method->annotation->ver}` ";
             }
+            if ($method->annotation->isSdk) {
+                $text .= " `SDK` ";
+            }
             if ($desc !== '') {
                 $text .= ' : '.$desc;
             }
