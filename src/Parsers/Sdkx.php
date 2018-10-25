@@ -1,0 +1,153 @@
+<?php
+/**
+ * @author wsfuyibing <websearch@163.com>
+ * @date   2018-05-09
+ */
+namespace Uniondrug\Postman\Parsers;
+
+use Uniondrug\Postman\Parsers\Abstracts\Base;
+
+/**
+ * SDK列表
+ * @package Uniondrug\Postman\Parsers
+ */
+class Sdkx extends Base
+{
+    public $collection;
+    public $names = [];
+
+    public function __construct(Collection $collection)
+    {
+        parent::__construct();
+        $this->collection = $collection;
+    }
+
+    /**
+     * @param string $name
+     * @param string $method
+     * @param string $path
+     * @param string $title
+     * @param string $description
+     */
+    public function add(string $name, string $method, string $path, string $title, string $description, string $linkTo)
+    {
+        $description = trim($description);
+        $description === '' || $description = "\n".'     * '.$description;
+        $key = strtolower($name);
+        $this->names[$key] = [
+            'FUNCTION' => $name,
+            'METHOD' => $method,
+            'PATH' => $path,
+            'TITLE' => trim($title),
+            'DESCRIPTION' => $description,
+            'LINKTO' => $this->collection->sdkLink.'/'.$this->collection->publishTo.'/'.$linkTo
+        ];
+    }
+
+    /**
+     * 导入文件
+     */
+    public function export()
+    {
+        $class = ucfirst($this->collection->sdkName).'Sdk';
+        $template = $this->renderClass($class);
+        $this->saveMarkdown($this->collection->basePath.'/'.$this->collection->publishPostmanTo, $class.'.php', $template);
+    }
+
+    /**
+     * 生成SDK文件
+     * @return string
+     */
+    private function renderClass(string $class)
+    {
+        $template = <<<'TEMP'
+<?php
+/**
+ * 重要说明
+ * 1. 本文件由Postman命令脚本自动生成, 请不要修改, 若需修改
+ *    请通过`php console postman`命令重新生成.
+ * 2. 本脚本在生成时, 依赖所在项目的Controller有 `@Sdk method`定义,
+ *    同时, 项目根目录下的`postman.json`需有`sdk`、`sdkLink`定义
+ * 3. 发布SDK，请将本文件放到`uniondrug/service-sdk`项目
+ *    的`src/Modules`目录下，并发重新发布release版本.
+ * @author {{AUTHOR}}
+ * @date   {{DATE}}
+ * @time   {{TIME}}
+ */
+namespace Uniondrug\ServiceSdk\Modules;
+
+use Uniondrug\ServiceSdk\Responses\ResponseInterface;
+
+/**
+ * {{CLASS}}
+ * @package Uniondrug\ServiceSdk\Modules
+ */
+class {{CLASS}} extends Abstracts\SdkBase
+{
+    /**
+     * 服务名称
+     * 自来`postman.json`文件定义的`sdk`值
+     * @var string
+     */
+    protected $serviceName = '{{SERVICE}}';
+
+{{METHODS}}
+}
+
+TEMP;
+        $values = [
+            'AUTHOR' => 'PostmanCommand',
+            'DATE' => date('Y-m-d'),
+            'TIME' => date('r'),
+            'CLASS' => $class,
+            'SERVICE' => $this->collection->sdkName,
+            'METHODS' => $this->renderMethods()
+        ];
+        foreach ($values as $key => $value) {
+            $rexp = '/\{\{'.$key.'\}\}/';
+            $template = preg_replace($rexp, $value, $template);
+        }
+        return $template;
+    }
+
+    /**
+     * 生成方法
+     * @param array
+     * @return string
+     */
+    private function renderMethod(array $datas)
+    {
+        $template = <<<'TEMP'
+    /**
+     * {{TITLE}}{{DESCRIPTION}}
+     * @link {{LINKTO}}
+     * @param array $body 入参类型
+     * @return ResponseInterface
+     */
+    public function {{FUNCTION}}($body)
+    {
+        return $this->restful("{{METHOD}}", "{{PATH}}", $body);
+    }
+TEMP;
+        foreach ($datas as $key => $value) {
+            $rexp = '/\{\{'.$key.'\}\}/';
+            $template = preg_replace($rexp, $value, $template);
+        }
+        return $template;
+    }
+
+    /**
+     * @return string
+     */
+    private function renderMethods()
+    {
+        ksort($this->names);
+        reset($this->names);
+        $methods = $comma = "";
+        foreach ($this->names as $datas) {
+            $methods .= $comma.$this->renderMethod($datas);
+            $comma .= "\n\n";
+        }
+        return $methods;
+    }
+}
