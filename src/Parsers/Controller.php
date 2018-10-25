@@ -38,6 +38,7 @@ class Controller extends Base
         $this->collection = $collection;
         $this->reflect = new \ReflectionClass($class);
         $this->filename = substr($this->reflect->getFileName(), strlen($collection->basePath) + 1);
+        $this->console->info("发现%s控制器", $this->reflect->name);
     }
 
     /**
@@ -68,9 +69,13 @@ class Controller extends Base
                 continue;
             }
             // 2.3 execute
-            $method = new Method($this->collection, $this, $reflect);
-            $method->parser();
-            $this->methods[] = $method;
+            try {
+                $method = new Method($this->collection, $this, $reflect);
+                $method->parser();
+                $this->methods[] = $method;
+            } catch(\Exception $e) {
+                $this->console->error($e->getMessage());
+            }
         }
     }
 
@@ -86,9 +91,15 @@ class Controller extends Base
         $url = str_replace('\\', '/', substr($this->reflect->getName(), 16));
         $prefix = './'.($curr ? '' : $url.'/');
         foreach ($this->methods as $method) {
-            $name = $method->annotation->name;
-            $desc = preg_replace("/\n/", " ", trim($method->annotation->description));
-            $text .= $comma.$space.'* ['.$name.']('.$prefix.$method->reflect->getShortName().'.md) : '.$desc;
+            $name = trim($method->annotation->name);
+            $desc = trim(preg_replace("/\n/", " ", trim($method->annotation->description)));
+            $text .= $comma.$space.'* ['.$name.']('.$prefix.$method->reflect->getShortName().'.md)';
+            if ($method->annotation->ver !== '') {
+                $text .= " `{$method->annotation->ver}` ";
+            }
+            if ($desc !== '') {
+                $text .= ' : '.$desc;
+            }
             $comma = $this->crlf;
         }
         return $text;
@@ -102,6 +113,11 @@ class Controller extends Base
     {
         $name = str_replace('\\', '/', substr($this->reflect->getName(), 16));
         $path = $this->collection->basePath.'/'.$this->collection->publishTo.'/'.$name;
+        $count = count($this->methods);
+        if ($count === 0) {
+            $this->console->warning("控制器{$this->reflect->getName()}无可导出动作, 忽略导出");
+            return;
+        }
         // 1. title
         $text = '# '.$this->annotation->name;
         // 2. description
@@ -111,7 +127,7 @@ class Controller extends Base
         }
         // 3. information
         $text .= $this->eol;
-        $text .= "* **接口** : `".count($this->methods)."` 个".$this->crlf;
+        $text .= "* **接口** : `".$count."` 个".$this->crlf;
         $text .= "* **前缀** : `{$this->annotation->prefix}`".$this->crlf;
         $text .= "* **类名** : `{$this->reflect->name}`".$this->crlf;
         $text .= "* **文件** : `{$this->filename}`";

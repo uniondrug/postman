@@ -62,12 +62,15 @@ class Annotation extends Base
      */
     public $validator = null;
     public $mock = '';
+    public $ver = '';
     /**
      * 是否为数组类型
      * @var bool
      */
     public $isArrayType = false;
     public $isStructType = false;
+    public $isIgnored = false;
+    public $isSdk = false;
     /**
      * @var bool|string
      */
@@ -86,8 +89,11 @@ class Annotation extends Base
     private static $regexpMock = "/@Mock[ ]+([^\n]+)\n/i";
     private static $regexpPrefix = "/@RoutePrefix[ ]*\(([^\)]*)\)/i";
     private static $regexpRequest = "/@(Route|Get|Post|Put|Patch|Delete|Options|head)[ ]*\(([^\)]*)\)/i";
+    private static $regexpSdk = "/@(sdk)[^a-z]*/i";
+    private static $regexpIgnore = "/@(ignore)[^a-z]*/i";
     private static $regexpType = "/@var[ ]+([_a-z0-9\\\]+)[ ]*([\[|\]| ]*)([^\n]*)\n/i";
     private static $regexpValidator = "/@validator[ ]*\(([^\)]*)\)/i";
+    private static $regexpVersion = "/@version[ ]+([^\n]+)\n/i";
 
     /**
      * Annotation constructor.
@@ -122,6 +128,21 @@ class Annotation extends Base
         if ($aliasName !== '') {
             $this->aliasName = $aliasName;
         }
+    }
+
+    public function ignored()
+    {
+        // 1. no comment
+        if ($this->comment === false) {
+            return;
+        }
+        // 2. not defined
+        preg_match(self::$regexpIgnore, $this->comment, $m);
+        if (count($m) === 0) {
+            return;
+        }
+        // 3. export
+        $this->isIgnored = true;
     }
 
     /**
@@ -234,6 +255,23 @@ class Annotation extends Base
     /**
      * 测试单元
      */
+    public function sdk()
+    {
+        if ($this->comment === false) {
+            return;
+        }
+        // 2. not defined
+        preg_match(self::$regexpSdk, $this->comment, $m);
+        if (count($m) === 0) {
+            return;
+        }
+        // 3. export
+        $this->isSdk = true;
+    }
+
+    /**
+     * 测试单元
+     */
     public function test()
     {
         if ($this->comment === false) {
@@ -303,6 +341,21 @@ class Annotation extends Base
         }
         // 3. parse
         $this->mock = trim($m[1]);
+    }
+
+    public function version()
+    {
+        // 1. not comment
+        if ($this->comment === false) {
+            return;
+        }
+        // 2. not defined
+        preg_match(self::$regexpVersion, $this->comment, $m);
+        if (count($m) === 0) {
+            return;
+        }
+        // 3. parse
+        $this->ver = trim($m[1]);
     }
 
     /**

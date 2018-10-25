@@ -36,7 +36,6 @@ class Method extends Base
 
     /**
      * Method constructor.
-     *
      * @param Collection        $collection
      * @param Controller        $controller
      * @param \ReflectionMethod $reflect
@@ -47,6 +46,7 @@ class Method extends Base
         $this->collection = $collection;
         $this->controller = $controller;
         $this->reflect = $reflect;
+        $this->console->debug("发现%s动作", $this->reflect->name);
     }
 
     /**
@@ -58,9 +58,18 @@ class Method extends Base
         $this->annotation = new Annotation($this->reflect);
         $this->annotation->info();
         $this->annotation->requeset();
+        $this->annotation->version();
+        $this->annotation->sdk();
+        $this->annotation->ignored();
         $this->annotation->input();
         $this->annotation->output();
         $this->annotation->test();
+        if ($this->annotation->isIgnored) {
+            throw new \Exception("动作{$this->reflect->class}::{$this->reflect->name}由@ignore约定, 忽略导出");
+        }
+        if ($this->annotation->isSdk) {
+            $this->console->debug("动作%s::%s导出到SDK", $this->reflect->class, $this->reflect->name);
+        }
         // 1. 补齐
         if ($this->annotation->name === '') {
             $this->annotation->name = $this->reflect->name.'()';
@@ -70,6 +79,7 @@ class Method extends Base
             try {
                 $this->inputParameter = new Parameters($this, $this->annotation->input, $this->controller->reflect->getNamespaceName());
             } catch(\Exception $e) {
+                $this->console->error($e->getMessage());
             }
         }
         // 3. 出参
@@ -77,6 +87,7 @@ class Method extends Base
             try {
                 $this->outputParameter = new Parameters($this, $this->annotation->output, $this->controller->reflect->getNamespaceName());
             } catch(\Exception $e) {
+                $this->console->error($e->getMessage());
             }
         }
     }
@@ -88,6 +99,7 @@ class Method extends Base
     {
         $text = '# '.$this->annotation->name.$this->eol;
         $text .= $this->headerText();
+        $text .= $this->eol.$this->sdkText();
         $text .= $this->eol.$this->inputText();
         $text .= $this->eol.$this->inputCode();
         $text .= $this->eol.$this->outputText();
@@ -183,23 +195,6 @@ class Method extends Base
         return [];
     }
 
-    private function afterParser()
-    {
-        $text = $this->headerText();
-        $text .= $this->eol.$this->inputText();
-        $text .= $this->eol.$this->inputCode();
-        $text .= $this->eol.$this->outputText();
-        $text .= $this->eol.$this->outputCode();
-        if (false !== ($fp = @fopen($this->collection->basePath.'/vendor/e.md', 'wb+'))) {
-            fwrite($fp, $text);
-            fclose($fp);
-        }
-        echo "---------\n";
-        echo $text;
-        echo "\n---------------\n";
-        exit;
-    }
-
     /**
      * 文档头信息
      * @return string
@@ -217,15 +212,50 @@ class Method extends Base
         $text .= $this->eol;
         $text .= '* **接口** : `'.$this->annotation->method.' '.$this->controller->annotation->prefix.$this->annotation->path.'`'.$this->crlf;
         if ($this->annotation->input !== '') {
-            $text .= '* **入参** : `'.$this->annotation->input.'`'.$this->crlf;
+            $text .= '* **入参** : `'.preg_replace("/^[^A-Z]/", "", $this->annotation->input).'`'.$this->crlf;
         }
         if ($this->annotation->output !== '') {
-            $text .= '* **出参** : `'.$this->annotation->output.'`'.$this->crlf;
+            $text .= '* **出参** : `'.preg_replace("/^[^A-Z]/", "", $this->annotation->output).'`'.$this->crlf;
         }
         $text .= '* **文件** : `'.$this->controller->filename.'`'.$this->crlf;
         $text .= '* **执行** : `'.$this->controller->reflect->name.'::'.$this->reflect->name.'()'.'`'.$this->crlf;
         $text .= '* **导出** : `'.date('Y-m-d H:i').'`';
         // 4. 返回
+        return $text;
+    }
+
+    private function sdkText()
+    {
+        // 1. 不导出SDK
+        if (!$this->annotation->isSdk) {
+            return '';
+        }
+        // 2. SDK用法
+        $text = '### SDK'.$this->eol;
+        $text .= '```'.$this->crlf;
+        $host = "{$this->controller->collection->host}://".preg_replace("/^\/+/", '', $this->controller->annotation->prefix.$this->annotation->path);
+        // 3. p1
+        $text .= '// 调用SDK'.$this->crlf;
+        $text .= '$sdk = $this->serviceSdk->'.strtolower($this->annotation->method).'(';
+        if ($this->annotation->method === 'GET') {
+            $text .= '"'.$host.'");'.$this->crlf;
+        } else {
+            $text .= $this->crlf;
+            $text .= '    "'.$host.'",'.$this->crlf;
+            $text .= '    ['.$this->crlf;
+            $text .= '        // 省略...'.$this->crlf;
+            $text .= '    ]'.$this->crlf;
+            $text .= ');'.$this->crlf;
+        }
+        // 4. p2
+        $text .= '// 是否有错'.$this->crlf;
+        $text .= 'if ($sdk->hasError()){'.$this->crlf;
+        $text .= '    throw new \Exception("SDK请求出错 - {$sdk->getError()}");'.$this->crlf;
+        $text .= '}'.$this->crlf;
+        // 5. p3
+        $text .= '// 继承逻辑'.$this->crlf;
+        $text .= '// ...'.$this->crlf;
+        $text .= '```'.$this->crlf;
         return $text;
     }
 
