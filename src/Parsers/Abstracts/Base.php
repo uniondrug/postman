@@ -26,9 +26,11 @@ abstract class Base
     public $schema = '{{protocol}}';
     public $domain = '{{domain}}';
     public $token = '{{token}}';
+    public $console;
 
     public function __construct()
     {
+        $this->console = new Console();
     }
 
     /**
@@ -39,13 +41,14 @@ abstract class Base
         $file = $path.'/'.$name;
         try {
             if (!is_dir($path)) {
-                mkdir($path, 0777,true);
+                mkdir($path, 0777, true);
             }
             $fp = fopen($file, 'wb+');
             fwrite($fp, $contents);
             fclose($fp);
+            $this->console->debug("导出到%s文件", $file);
         } catch(\Exception $e) {
-            echo $e->getMessage();
+            $this->console->error($e->getMessage());
             exit;
         }
     }

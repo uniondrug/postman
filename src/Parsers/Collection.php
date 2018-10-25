@@ -26,6 +26,7 @@ class Collection extends Base
      * @var string
      */
     public $name = '';
+    public $prefix = '';
     /**
      * 描述
      * @var string
@@ -55,14 +56,12 @@ class Collection extends Base
 
     /**
      * Controller constructor.
-     *
      * @param string $path 项目路径
      */
     public function __construct(string $path)
     {
         parent::__construct();
         $this->basePath = $path;
-        $this->name = $path;
         // 1. load config
         $file = $path.'/postman.json';
         if (file_exists($file)) {
@@ -72,10 +71,15 @@ class Collection extends Base
                 isset($json->name) && $this->name = $json->name;
                 isset($json->description) && $this->description = $json->description;
                 isset($json->host) && $this->host = $json->host;
-                isset($json->name) && $this->auth = strtoupper($json->auth) === 'YES';
+                isset($json->auth) && $this->auth = strtoupper($json->auth) === 'YES';
             }
         }
-        // 2. 遍历目录
+        // 2. console
+        $this->console->info("{$json->name}, {$json->description}");
+        $this->console->info("需要鉴权: {$json->auth}");
+        $this->console->info("域名前缀: {$json->host}");
+        $this->console->info("扫描目录: %s", $this->controllerPath);
+        // 3. 遍历目录
         $this->scanner($path.'/'.$this->controllerPath);
     }
 
@@ -91,6 +95,7 @@ class Collection extends Base
                 $controller->parser();
                 $this->controllers[$class] = $controller;
             } catch(\Exception $e) {
+                $this->console->error($e->getMessage());
             }
         }
     }
@@ -125,7 +130,10 @@ class Collection extends Base
         $text .= $this->eol;
         $text .= '### 接口目录'.$this->eol;
         foreach ($this->controllers as $controller) {
-            $name = $controller->annotation->name;
+            if (count($controller->methods) === 0) {
+                continue;
+            }
+            $name = trim($controller->annotation->name);
             $desc = preg_replace("/\n/", "", trim($controller->annotation->description));
             $url = str_replace('\\', '/', substr($controller->reflect->getName(), 16));
             $text .= '* ['.$name.'](./'.$url.'/README.md) : '.$desc.$this->crlf;
@@ -169,7 +177,6 @@ class Collection extends Base
 
     /**
      * 扫描Controller目录
-     *
      * @param string $path
      */
     private function scanner($path)
