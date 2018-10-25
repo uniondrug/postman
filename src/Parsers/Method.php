@@ -111,6 +111,12 @@ class Method extends Base
         $name = str_replace('\\', '/', substr($this->controller->reflect->getName(), 16));
         $path = $this->collection->basePath.'/'.$this->collection->publishTo.'/'.$name;
         $this->saveMarkdown($path, $this->reflect->getShortName().'.md', $text);
+        /**
+         * 添加到SDK列表
+         */
+        if ($this->annotation->isSdk) {
+            $this->controller->collection->sdkx->add($this->annotation->sdkName, $this->annotation->method, $this->controller->annotation->prefix.$this->annotation->path, $this->annotation->name, $this->annotation->description, $name.'/'.$this->reflect->getShortName().'.md');
+        }
     }
 
     /**
@@ -232,28 +238,34 @@ class Method extends Base
         }
         // 2. SDK用法
         $text = '### SDK'.$this->eol;
-        $text .= '```'.$this->crlf;
-        $host = "{$this->controller->collection->host}://".preg_replace("/^\/+/", '', $this->controller->annotation->prefix.$this->annotation->path);
-        // 3. p1
-        $text .= '// 调用SDK'.$this->crlf;
-        $text .= '$sdk = $this->serviceSdk->'.strtolower($this->annotation->method).'(';
-        if ($this->annotation->method === 'GET') {
-            $text .= '"'.$host.'");'.$this->crlf;
-        } else {
-            $text .= $this->crlf;
-            $text .= '    "'.$host.'",'.$this->crlf;
-            $text .= '    ['.$this->crlf;
-            $text .= '        // 省略...'.$this->crlf;
-            $text .= '    ]'.$this->crlf;
-            $text .= ');'.$this->crlf;
+        // 2.1
+        if ($this->collection->sdkName !== '') {
+            $text .= '*用法(1)*'.$this->eol;
+            $text .= '```'.$this->crlf;
+            $text .= '// 参数设置见入参段落'.$this->crlf;
+            $text .= '$body = []; // 详见入参段落'.$this->crlf;
+            $text .= '$response = $this->serviceSdk->'.$this->collection->sdkName.'->'.$this->annotation->sdkName.'($body);'.$this->crlf;
+            $text .= '```';
+            $text .= $this->eol;
         }
-        // 4. p2
+        // 2.2
+        $host = "{$this->controller->collection->host}://".preg_replace("/^\/+/", '', $this->controller->annotation->prefix.$this->annotation->path);
+        $text .= '*用法(2)*'.$this->eol;
+        $text .= '```'.$this->crlf;
+        $text .= '// 参数设置见入参段落'.$this->crlf;
+        $text .= '$body = []; // 详见入参段落'.$this->crlf;
+        $text .= '$response = $this->serviceSdk->'.strtolower($this->annotation->method);
+        $text .= '("'.$host.'", $body);'.$this->crlf;
+        $text .= '```'.$this->eol;
+        // 2.3
+        $text .= '*结果处理*'.$this->eol;
+        $text .= '```'.$this->crlf;
         $text .= '// 是否有错'.$this->crlf;
         $text .= 'if ($sdk->hasError()){'.$this->crlf;
-        $text .= '    throw new \Exception("SDK请求出错 - {$sdk->getError()}");'.$this->crlf;
+        $text .= '    // 执行错误逻辑;'.$this->crlf;
         $text .= '}'.$this->crlf;
         // 5. p3
-        $text .= '// 继承逻辑'.$this->crlf;
+        $text .= '// 执行正确逻辑'.$this->crlf;
         $text .= '// ...'.$this->crlf;
         $text .= '```'.$this->crlf;
         return $text;

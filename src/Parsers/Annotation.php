@@ -71,6 +71,7 @@ class Annotation extends Base
     public $isStructType = false;
     public $isIgnored = false;
     public $isSdk = false;
+    public $sdkName = '';
     /**
      * @var bool|string
      */
@@ -89,8 +90,8 @@ class Annotation extends Base
     private static $regexpMock = "/@Mock[ ]+([^\n]+)\n/i";
     private static $regexpPrefix = "/@RoutePrefix[ ]*\(([^\)]*)\)/i";
     private static $regexpRequest = "/@(Route|Get|Post|Put|Patch|Delete|Options|head)[ ]*\(([^\)]*)\)/i";
-    private static $regexpSdk = "/@(sdk)[^a-z]*/i";
-    private static $regexpIgnore = "/@(ignore)[^a-z]*/i";
+    private static $regexpSdk = "/@(Sdk)[ ]+([^\n]+)\n/i";
+    private static $regexpIgnore = "/@(Ignore)[^a-z]*/i";
     private static $regexpType = "/@var[ ]+([_a-z0-9\\\]+)[ ]*([\[|\]| ]*)([^\n]*)\n/i";
     private static $regexpValidator = "/@validator[ ]*\(([^\)]*)\)/i";
     private static $regexpVersion = "/@version[ ]+([^\n]+)\n/i";
@@ -267,6 +268,7 @@ class Annotation extends Base
         }
         // 3. export
         $this->isSdk = true;
+        $this->sdkName = trim($m[2]);
     }
 
     /**

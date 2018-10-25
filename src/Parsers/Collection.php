@@ -26,6 +26,8 @@ class Collection extends Base
      * @var string
      */
     public $name = '';
+    public $sdkName = '';
+    public $sdkLink = '';
     public $prefix = '';
     /**
      * 描述
@@ -53,6 +55,7 @@ class Collection extends Base
     public $basePath;
     public $codeMap = null;
     private $controllerPath = 'app/Controllers';
+    public $sdkx;
 
     /**
      * Controller constructor.
@@ -72,13 +75,22 @@ class Collection extends Base
                 isset($json->description) && $this->description = $json->description;
                 isset($json->host) && $this->host = $json->host;
                 isset($json->auth) && $this->auth = strtoupper($json->auth) === 'YES';
+                isset($json->sdk) && $this->sdkName = $json->sdk;
+                isset($json->sdkLink) && $this->sdkLink = $json->sdkLink;
             }
         }
+        $this->sdkx = new Sdkx($this);
         // 2. console
         $this->console->info("{$json->name}, {$json->description}");
         $this->console->info("需要鉴权: {$json->auth}");
         $this->console->info("域名前缀: {$json->host}");
         $this->console->info("扫描目录: %s", $this->controllerPath);
+        if ($this->sdkName === '') {
+            $this->console->warning("SDK名称未在postman.json中定义sdk字段值, SDK导出将被禁用.");
+            if ($this->sdkLink === '') {
+                $this->console->warning("SDK入参文档前缀未定义sdkLink字段值, 文档连接错误.");
+            }
+        }
         // 3. 遍历目录
         $this->scanner($path.'/'.$this->controllerPath);
     }
@@ -152,6 +164,10 @@ class Collection extends Base
         // 7. trigger controllers
         foreach ($this->controllers as $controller) {
             $controller->toMarkdown();
+        }
+        // 8. SDK
+        if ($this->sdkName === '') {
+            $this->sdkx->export();
         }
     }
 
