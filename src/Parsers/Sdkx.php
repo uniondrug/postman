@@ -57,7 +57,7 @@ class Sdkx extends Base
      */
     public function export()
     {
-        $class = ucfirst($this->collection->sdkName).'Sdk';
+        $class = ucfirst($this->collection->sdk).'Sdk';
         $template = $this->renderClass($class);
         $this->saveMarkdown($this->collection->basePath.'/'.$this->collection->publishPostmanTo, $class.'.php', $template);
     }
@@ -94,7 +94,7 @@ class {{CLASS}} extends Abstracts\SdkBase
 {
     /**
      * 服务名称
-     * 自来`postman.json`文件定义的`sdk`值
+     * 自来`postman.json`文件定义的`sdkService`值
      * @var string
      */
     protected $serviceName = '{{SERVICE}}';
@@ -108,7 +108,7 @@ TEMP;
             'DATE' => date('Y-m-d'),
             'TIME' => date('r'),
             'CLASS' => $class,
-            'SERVICE' => $this->collection->sdkName,
+            'SERVICE' => $this->collection->sdkService,
             'METHODS' => $this->renderMethods()
         ];
         foreach ($values as $key => $value) {
