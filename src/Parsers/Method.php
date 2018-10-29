@@ -239,12 +239,12 @@ class Method extends Base
         // 2. SDK用法
         $text = '### SDK'.$this->eol;
         // 2.1
-        if ($this->collection->sdkName !== '') {
+        if ($this->collection->sdk !== '') {
             $text .= '*用法(1)*'.$this->eol;
             $text .= '```'.$this->crlf;
             $text .= '// 参数设置见入参段落'.$this->crlf;
             $text .= '$body = []; // 入参'.$this->crlf;
-            $text .= '$response = $this->serviceSdk->'.$this->collection->sdkName.'->'.$this->annotation->sdkName.'($body);'.$this->crlf;
+            $text .= '$response = $this->serviceSdk->'.$this->collection->sdk.'->'.$this->annotation->sdkName.'($body);'.$this->crlf;
             $text .= '```';
             $text .= $this->eol;
         }
