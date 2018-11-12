@@ -3,6 +3,28 @@
 > 以命令行的模式, 一健导出`Markdown`文档、`Postman`接口工具、`SDK`。
 
 
+
+### 字段配置
+
+| 类型 | 名称 | 默认 | 用途 |
+| -- | -- | :-- |
+| string | auth | NO | 是否需要鉴权<br />`NO`: 不需要<br />`YES`: 需要 |
+| string | name | 空 | 导出的Postman文档的Collection名称, 若不指定则使用应用配置项`app.appName`的值 |
+| string | description | 空 | 在Postman工作中显示的描述项目描述 |
+| string | host | 空 | 域名前缀 |
+| string | sdk | 空 | -- |
+| string | sdkService | 空 | -- |
+| string | sdkLink | 空 | -- |
+
+```json
+{
+    "name" : "", 
+    "description" : ""
+}
+```
+
+
+
 ### 如何导出
 
 ```php
