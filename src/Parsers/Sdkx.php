@@ -77,20 +77,21 @@ class Sdkx extends Base
  * 2. 本脚本在生成时, 依赖所在项目的Controller有 `@Sdk method`定义,
  *    同时, 项目根目录下的`postman.json`需有`sdk`、`sdkLink`定义
  * 3. 发布SDK，请将本文件放到`uniondrug/service-sdk`项目
- *    的`src/Modules`目录下，并发重新发布release版本.
+ *    的`src/Exports/{{NAMESPACE}}`目录下，并发重新发布release版本.
  * @author {{AUTHOR}}
  * @date   {{DATE}}
  * @time   {{TIME}}
  */
-namespace Uniondrug\ServiceSdk\Modules;
+namespace Uniondrug\ServiceSdk\Exports\{{NAMESPACE}};
 
+use Uniondrug\ServiceSdk\Exports\Abstracts\SdkBase;
 use Uniondrug\ServiceSdk\Responses\ResponseInterface;
 
 /**
  * {{CLASS}}
  * @package Uniondrug\ServiceSdk\Modules
  */
-class {{CLASS}} extends Abstracts\SdkBase
+class {{CLASS}} extends SdkBase
 {
     /**
      * 服务名称
@@ -107,6 +108,7 @@ TEMP;
             'AUTHOR' => 'PostmanCommand',
             'DATE' => date('Y-m-d'),
             'TIME' => date('r'),
+            'NAMESPACE' => ucfirst($this->collection->sdkPath)."s",
             'CLASS' => $class,
             'SERVICE' => $this->collection->sdkService,
             'METHODS' => $this->renderMethods()
