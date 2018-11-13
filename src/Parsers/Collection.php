@@ -7,6 +7,7 @@ namespace Uniondrug\Postman\Parsers;
 
 use App\Errors\Code;
 use Phalcon\Di;
+use Uniondrug\Framework\Container;
 use Uniondrug\Postman\Parsers\Abstracts\Base;
 
 /**
@@ -26,8 +27,28 @@ class Collection extends Base
      * @var string
      */
     public $name = '';
+    /**
+     * SDK类名
+     * 如: mbs2
+     * @var string
+     */
     public $sdk = '';
+    /**
+     * SDK路径
+     * 如: module
+     * @var string
+     */
+    public $sdkPath = '';
+    /**
+     * SDK服务名
+     * 如: mbs2.module
+     * @var string
+     */
     public $sdkService = '';
+    /**
+     * 目标应用文档连接前缀
+     * @var string
+     */
     public $sdkLink = '';
     public $prefix = '';
     /**
@@ -67,21 +88,15 @@ class Collection extends Base
         parent::__construct();
         $this->basePath = $path;
         // 1. load config
-        $file = $path.'/postman.json';
-        if (file_exists($file)) {
-            $text = file_get_contents($file);
-            $json = json_decode($text);
-            if ($json instanceof \stdClass) {
-                isset($json->name) && $this->name = $json->name;
-                isset($json->description) && $this->description = $json->description;
-                isset($json->host) && $this->host = $json->host;
-                isset($json->auth) && $this->auth = strtoupper($json->auth) === 'YES';
-                isset($json->sdk) && $this->sdk = $json->sdk;
-                isset($json->sdkService) && $this->sdkService = $json->sdkService;
-                isset($json->sdkLink) && $this->sdkLink = $json->sdkLink;
-                $this->sdkService === '' && $this->sdkService = $this->sdk;
-            }
-        }
+        $json = $this->initPostmanJson();
+        $this->name = $json->name;
+        $this->description = $json->description;
+        $this->host = $json->host;
+        $this->auth = strtoupper($json->auth) === 'YES';
+        $this->sdk = $json->sdk;
+        $this->sdkPath = $json->sdkPath;
+        $this->sdkService = $json->sdkService;
+        $this->sdkLink = $json->sdkLink;
         $this->sdkx = new Sdkx($this);
         // 2. console
         $this->console->info("{$json->name}, {$json->description}");
@@ -192,6 +207,64 @@ class Collection extends Base
             $data['item'][] = $controller->toPostman();
         }
         return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * JSON配置文件
+     * @return \stdClass
+     */
+    private function initPostmanJson()
+    {
+        /**
+         * 1. 初始化POSTMAN配置
+         * @var Container $di
+         */
+        $di = Di::getDefault();
+        $data = new \stdClass();
+        // 1.1 通过appName计算
+        //     sdk
+        //     sdkPath
+        $appName = $di->getConfig()->path('app.appName');
+        $appName = preg_replace("/\-/", '.', $appName);
+        $appNameArr = explode('.', $appName);
+        $appNameDesc = [];
+        for ($i = count($appNameArr) - 1; $i >= 0; $i--) {
+            $appNameDesc[] = $appNameArr[$i];
+        }
+        $sdkPath = array_pop($appNameArr);
+        if (!in_array($sdkPath, [
+            'backend',
+            'module',
+            'union'
+        ])
+        ) {
+            $this->console->warning("应用名称在配置文件[config/app.php]中的[appName]字段值不合法, 必须以module、union、backend结尾");
+        }
+        $sdkClass = preg_replace_callback("/[\.|\-](\w)/", function($a){
+            return strtoupper($a[1]);
+        }, implode('.', $appNameArr));
+        // 1.2 赋初始值
+        $data->auth = "NO";
+        $data->name = $appName;
+        $data->description = $appName;
+        $data->host = $appName;
+        $data->sdk = $sdkClass;
+        $data->sdkPath = $sdkPath;
+        $data->sdkService = $appName;
+        $data->sdkLink = "https://uniondrug.coding.net/p/".implode(".", $appNameDesc)."/git/blob/development";;
+        // 2. 配置文件优选级
+        $path = "{$this->basePath}/postman.json";
+        if (file_exists($path)) {
+            $json = file_get_contents($path);
+            $conf = json_decode($json);
+            if (is_object($conf)) {
+                isset($conf->auth) && $conf->auth !== "" && $data->auth = $conf->auth;
+                isset($conf->name) && $conf->name !== "" && $data->name = $conf->name;
+                isset($conf->description) && $conf->description !== "" && $data->description = $conf->description;
+                isset($conf->sdkLink) && $conf->sdkLink !== "" && $data->sdkLink = $conf->sdkLink;
+            }
+        }
+        return $data;
     }
 
     /**

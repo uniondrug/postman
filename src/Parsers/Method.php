@@ -240,20 +240,25 @@ class Method extends Base
         $text = '### SDK'.$this->eol;
         // 2.1
         if ($this->collection->sdk !== '') {
-            $text .= '*用法(1)*'.$this->eol;
+            $text .= '**`一类用法`**'.$this->eol;
             $text .= '```'.$this->crlf;
-            $text .= '// 参数设置见入参段落'.$this->crlf;
-            $text .= '$body = []; // 入参'.$this->crlf;
-            $text .= '$response = $this->serviceSdk->'.$this->collection->sdk.'->'.$this->annotation->sdkName.'($body);'.$this->crlf;
+            $text .= '// [推荐]推荐使用本用法'.$this->crlf;
+            $text .= '//      不足之处, 需发布导出的['.ucfirst($this->collection->sdk).'Sdk.php]文件到SDK项目下'.$this->crlf;
+            $text .= '//      并创建release版本, 调用方执行composer update完成更新'.$this->crlf;
+            $text .= '// SDK项目地址 https://github.com/uniondrug/service-sdk'.$this->crlf;
+            $text .= '$body = [];'.$this->crlf;
+            $text .= '$response = $this->serviceSdk->'.lcfirst($this->collection->sdkPath).'->'.$this->collection->sdk.'->'.lcfirst($this->annotation->sdkName).'($body);'.$this->crlf;
             $text .= '```';
             $text .= $this->eol;
         }
         // 2.2
         $host = "{$this->controller->collection->host}://".preg_replace("/^\/+/", '', $this->controller->annotation->prefix.$this->annotation->path);
-        $text .= '*用法(2)*'.$this->eol;
+        $text .= '_`二类用法`_'.$this->eol;
         $text .= '```'.$this->crlf;
-        $text .= '// 参数设置见入参段落'.$this->crlf;
-        $text .= '$body = []; // 入参'.$this->crlf;
+        $text .= '// [慎用]不推荐'.$this->crlf;
+        $text .= '//      该用法需要你知道域名前缀及路径路径, 同时不便于后期维护'.$this->crlf;
+        $text .= '//      一经修改将有大量项目及文件(调用方)同步修改'.$this->crlf;
+        $text .= '$body = [];'.$this->crlf;
         $text .= '$response = $this->serviceSdk->'.strtolower($this->annotation->method);
         $text .= '("'.$host.'", $body);'.$this->crlf;
         $text .= '```'.$this->eol;
