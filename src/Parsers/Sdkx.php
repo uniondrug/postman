@@ -156,7 +156,7 @@ TEMP;
         $methods = $comma = "";
         foreach ($this->names as $datas) {
             $methods .= $comma.$this->renderMethod($datas);
-            $comma .= "\n\n";
+            $comma = "\n\n";
         }
         return $methods;
     }
