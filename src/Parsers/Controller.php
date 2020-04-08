@@ -115,7 +115,7 @@ class Controller extends Base
     public function toMarkdown()
     {
         $name = str_replace('\\', '/', substr($this->reflect->getName(), 16));
-        $path = $this->collection->basePath.'/'.$this->collection->publishTo.'/'.$name;
+        $path = $this->collection->exportPath.'/'.$this->collection->publishTo.'/'.$name;
         $count = count($this->methods);
         if ($count === 0) {
             $this->console->warning("控制器{$this->reflect->getName()}无可导出动作, 忽略导出");

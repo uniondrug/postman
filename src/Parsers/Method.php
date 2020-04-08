@@ -109,7 +109,7 @@ class Method extends Base
         $text .= $this->eol;
         $text .= $this->collection->getCodeMap();
         $name = str_replace('\\', '/', substr($this->controller->reflect->getName(), 16));
-        $path = $this->collection->basePath.'/'.$this->collection->publishTo.'/'.$name;
+        $path = $this->collection->exportPath.'/'.$this->collection->publishTo.'/'.$name;
         $this->saveMarkdown($path, $this->reflect->getShortName().'.md', $text);
         /**
          * 添加到SDK列表

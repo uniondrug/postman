@@ -75,6 +75,10 @@ class Collection extends Base
      * @var string
      */
     public $basePath;
+    /**
+     * @var string
+     */
+    public $exportPath;
     public $codeMap = null;
     private $controllerPath = 'app/Controllers';
     public $sdkx;
@@ -83,10 +87,11 @@ class Collection extends Base
      * Controller constructor.
      * @param string $path 项目路径
      */
-    public function __construct(string $path)
+    public function __construct(string $path,string $exportPath)
     {
         parent::__construct();
         $this->basePath = $path;
+        $this->exportPath = $exportPath;
         // 1. load config
         $json = $this->initPostmanJson();
         $this->name = $json->name;
@@ -178,7 +183,7 @@ class Collection extends Base
         $text .= $this->eol;
         $text .= $this->getCodeMap();
         // 6. save README.md
-        $this->saveMarkdown($this->basePath.'/'.$this->publishTo, 'README.md', $text);
+        $this->saveMarkdown($this->exportPath.'/'.$this->publishTo, 'README.md', $text);
         // 7. trigger controllers
         foreach ($this->controllers as $controller) {
             $controller->toMarkdown();

@@ -18,13 +18,19 @@ class Postman extends Command
                             {--mode=api : 发布markdown文档}
                             {--path=docs/api : markdown文档存储位置}';
 
+    public $exportPath = '';
+    public $publishTo = 'docs/api';
+    public $publishPostmanTo = 'docs';
     /**
      * @inheritdoc
      */
     public function handle()
     {
         $path = getcwd();
-        $collection = new Collection($path);
+        $this->exportPath = $this->exportPath ?:$path;
+        $collection = new Collection($path,$this->exportPath);
+        $collection->publishTo = $this->publishTo;
+        $collection->publishPostmanTo = $this->publishPostmanTo;
         $collection->parser();
         $this->asMarkdown($collection);
         $this->asPostman($collection);
@@ -38,6 +44,6 @@ class Postman extends Command
     private function asPostman(Collection $collection)
     {
         $contents = $collection->toPostman();
-        $collection->saveMarkdown($collection->basePath.'/'.$collection->publishPostmanTo, 'postman.json', $contents);
+        $collection->saveMarkdown($collection->exportPath.'/'.$collection->publishPostmanTo, 'postman.json', $contents);
     }
 }

@@ -59,7 +59,7 @@ class Sdkx extends Base
     {
         $class = ucfirst($this->collection->sdk).'Sdk';
         $template = $this->renderClass($class);
-        $this->saveMarkdown($this->collection->basePath.'/'.$this->collection->publishPostmanTo, $class.'.php', $template);
+        $this->saveMarkdown($this->collection->exportPath.'/'.$this->collection->publishPostmanTo, $class.'.php', $template);
     }
 
     /**
