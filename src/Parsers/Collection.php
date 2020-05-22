@@ -87,7 +87,7 @@ class Collection extends Base
      * Controller constructor.
      * @param string $path 项目路径
      */
-    public function __construct(string $path,string $exportPath)
+    public function __construct(string $path, string $exportPath)
     {
         parent::__construct();
         $this->basePath = $path;
@@ -206,7 +206,8 @@ class Collection extends Base
                 'description' => $this->description,
                 "schema" => "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
             ],
-            'item' => []
+            'item' => [],
+            'event' => $this->toPostmanEvent()
         ];
         foreach ($this->controllers as $controller) {
             $data['item'][] = $controller->toPostman();
@@ -241,8 +242,7 @@ class Collection extends Base
             'backend',
             'module',
             'union'
-        ])
-        ) {
+        ])) {
             $this->console->warning("应用名称在配置文件[config/app.php]中的[appName]字段值不合法, 必须以module、union、backend结尾");
         }
         $sdkClass = preg_replace_callback("/[\.|\-](\w)/", function($a){
@@ -297,5 +297,40 @@ class Collection extends Base
             $class = '\\App\\Controllers\\'.substr($info->getPathname(), $length + 1, -4);
             $this->classMap[] = $class;
         }
+    }
+
+    public function toPostmanEvent()
+    {
+        // 默认端口
+        $_serverPort = $_defaultPort = 80;
+        $serv = \config()->path('server.host');
+        if ($serv) {
+            if (preg_match("/(\S+):(\d+)/", $serv, $m) > 0) {
+                $_serverPort = substr($m[2], 1);
+            }
+        }
+        $exec = [];
+        $exec[] = 'var env = pm.environment.get(\'domain\');';
+        $exec[] = 'var runType = pm.environment.get(\'swoole\');';
+        $exec[] = 'var port = '.$_defaultPort.';';
+        $exec[] = 'if (env != \'dev.uniondrug.info\' && env != \'turboradio.cn\' && env != \'uniondrug.net\' && env != \'uniondrug.cn\') {';
+        $exec[] = '    if (runType == undefined || runType == \'0\' || runType == \'false\') {';
+        $exec[] = '        port = '.$_defaultPort.';';
+        $exec[] = '    } else {';
+        $exec[] = '        port = '.$_serverPort.';';
+        $exec[] = '    }';
+        $exec[] = '}';
+        $exec[] = 'pm.environment.set("port", port);';
+        $exec[] = 'console.log(env + \':\' + port);';
+        return [
+            [
+                'listen' => 'prerequest',
+                'script' => [
+                    'id' => md5($this->name.'::'.$this->name),
+                    'type' => 'text/javascript',
+                    'exec' => $exec
+                ]
+            ]
+        ];
     }
 }

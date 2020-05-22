@@ -171,9 +171,10 @@ class Method extends Base
         }
         // url
         $data['url'] = [
-            'raw' => $this->schema.'://'.$this->collection->host.'.'.$this->domain.$this->controller->annotation->prefix.$this->annotation->path,
+            'raw' => $this->schema.'://'.$this->collection->host.'.'.$this->domain.':'.$this->port.$this->controller->annotation->prefix.$this->annotation->path,
             'protocol' => $this->schema,
             'host' => explode('.', $this->collection->host.'.'.$this->domain),
+            'port' => $this->port,
             'path' => explode('/', substr($this->controller->annotation->prefix.$this->annotation->path, 1))
         ];
         // post body
