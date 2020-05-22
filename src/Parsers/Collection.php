@@ -265,6 +265,7 @@ class Collection extends Base
             if (is_object($conf)) {
                 isset($conf->auth) && $conf->auth !== "" && $data->auth = $conf->auth;
                 isset($conf->name) && $conf->name !== "" && $data->name = $conf->name;
+                isset($conf->host) && $conf->host !== "" && $data->host = $conf->host;
                 isset($conf->description) && $conf->description !== "" && $data->description = $conf->description;
                 isset($conf->sdkLink) && $conf->sdkLink !== "" && $data->sdkLink = $conf->sdkLink;
             }
