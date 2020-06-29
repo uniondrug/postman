@@ -132,11 +132,13 @@ TEMP;
      * {{TITLE}}{{DESCRIPTION}}
      * @link {{LINKTO}}
      * @param array $body 入参类型
+     * @param null $query  Query数据
+     * @param null $extra  请求头信息
      * @return ResponseInterface
      */
-    public function {{FUNCTION}}($body)
+    public function {{FUNCTION}}($body, $query = null, $extra = null)
     {
-        return $this->restful("{{METHOD}}", "{{PATH}}", $body);
+        return $this->restful("{{METHOD}}", "{{PATH}}", $body, $query, $extra);
     }
 TEMP;
         foreach ($datas as $key => $value) {
