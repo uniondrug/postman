@@ -25,6 +25,7 @@ abstract class Base
     public $eol = "\n\n";
     public $schema = '{{protocol}}';
     public $domain = '{{domain}}';
+    public $port = '{{port}}';
     public $token = '{{token}}';
     public $console;
 

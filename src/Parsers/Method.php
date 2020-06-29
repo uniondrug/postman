@@ -109,7 +109,7 @@ class Method extends Base
         $text .= $this->eol;
         $text .= $this->collection->getCodeMap();
         $name = str_replace('\\', '/', substr($this->controller->reflect->getName(), 16));
-        $path = $this->collection->basePath.'/'.$this->collection->publishTo.'/'.$name;
+        $path = $this->collection->exportPath.'/'.$this->collection->publishTo.'/'.$name;
         $this->saveMarkdown($path, $this->reflect->getShortName().'.md', $text);
         /**
          * 添加到SDK列表
@@ -171,9 +171,10 @@ class Method extends Base
         }
         // url
         $data['url'] = [
-            'raw' => $this->schema.'://'.$this->collection->host.'.'.$this->domain.$this->controller->annotation->prefix.$this->annotation->path,
+            'raw' => $this->schema.'://'.$this->collection->host.'.'.$this->domain.':'.$this->port.$this->controller->annotation->prefix.$this->annotation->path,
             'protocol' => $this->schema,
             'host' => explode('.', $this->collection->host.'.'.$this->domain),
+            'port' => $this->port,
             'path' => explode('/', substr($this->controller->annotation->prefix.$this->annotation->path, 1))
         ];
         // post body
@@ -247,7 +248,9 @@ class Method extends Base
             $text .= '//      并创建release版本, 调用方执行composer update完成更新'.$this->crlf;
             $text .= '// SDK项目地址 https://github.com/uniondrug/service-sdk'.$this->crlf;
             $text .= '$body = [];'.$this->crlf;
-            $text .= '$response = $this->serviceSdk->'.lcfirst($this->collection->sdkPath).'->'.$this->collection->sdk.'->'.lcfirst($this->annotation->sdkName).'($body);'.$this->crlf;
+            $text .= '$query = null;//Query数据'.$this->crlf;
+            $text .= '$extra = null;//请求头信息'.$this->crlf;
+            $text .= '$response = $this->serviceSdk->'.lcfirst($this->collection->sdkPath).'->'.$this->collection->sdk.'->'.lcfirst($this->annotation->sdkName).'($body, $query, $extra);'.$this->crlf;
             $text .= '```';
             $text .= $this->eol;
         }
@@ -259,8 +262,10 @@ class Method extends Base
         $text .= '//      该用法需要你知道域名前缀及路径路径, 同时不便于后期维护'.$this->crlf;
         $text .= '//      一经修改将有大量项目及文件(调用方)同步修改'.$this->crlf;
         $text .= '$body = [];'.$this->crlf;
+        $text .= '$query = null;//Query数据'.$this->crlf;
+        $text .= '$extra = null;//请求头信息'.$this->crlf;
         $text .= '$response = $this->serviceSdk->'.strtolower($this->annotation->method);
-        $text .= '("'.$host.'", $body);'.$this->crlf;
+        $text .= '("'.$host.'", $body, $query, $extra);'.$this->crlf;
         $text .= '```'.$this->eol;
         // 2.3
         $text .= '*结果处理*'.$this->eol;
