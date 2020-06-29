@@ -85,7 +85,7 @@ class Sdkx extends Base
 namespace Uniondrug\ServiceSdk\Exports\{{NAMESPACE}};
 
 use Uniondrug\ServiceSdk\Exports\Abstracts\SdkBase;
-use Uniondrug\ServiceSdk\Responses\ResponseInterface;
+use Uniondrug\ServiceSdk\Bases\ResponseInterface;
 
 /**
  * {{CLASS}}
