@@ -131,7 +131,7 @@ TEMP;
     /**
      * {{TITLE}}{{DESCRIPTION}}
      * @link {{LINKTO}}
-     * @param array $body 入参类型
+     * @param array|object $body 入参类型
      * @param null $query  Query数据
      * @param null $extra  请求头信息
      * @return ResponseInterface
