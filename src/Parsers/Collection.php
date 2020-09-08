@@ -231,7 +231,7 @@ class Collection extends Base
         //     sdk
         //     sdkPath
         $appName = $di->getConfig()->path('app.appName');
-        $appName = preg_replace("/\-/", '.', $appName);
+        /*$appName = preg_replace("/\-/", '.', $appName);
         $appNameArr = explode('.', $appName);
         $appNameDesc = [];
         for ($i = count($appNameArr) - 1; $i >= 0; $i--) {
@@ -244,6 +244,16 @@ class Collection extends Base
             'union'
         ])) {
             $this->console->warning("应用名称在配置文件[config/app.php]中的[appName]字段值不合法, 必须以module、union、backend结尾");
+        }*/
+        $appNameArr = explode('-', $appName);
+        $appNameAsc = $appNameArr;
+        $sdkPath = array_shift($appNameArr);
+        if (!in_array($sdkPath, [
+            'pm',
+            'ps',
+            'px'
+        ])) {
+            $this->console->warning("应用名称在配置文件[config/app.php]中的[appName]字段值不合法, 必须以pm、ps、px 开头");
         }
         $sdkClass = preg_replace_callback("/[\.|\-](\w)/", function($a){
             return strtoupper($a[1]);
@@ -256,7 +266,8 @@ class Collection extends Base
         $data->sdk = $sdkClass;
         $data->sdkPath = $sdkPath;
         $data->sdkService = $appName;
-        $data->sdkLink = "https://uniondrug.coding.net/p/".implode(".", $appNameDesc)."/git/blob/development";;
+        //$data->sdkLink = "https://uniondrug.coding.net/p/".implode(".", $appNameDesc)."/git/blob/development";;
+        $data->sdkLink = "https://uniondrug.coding.net/p/".implode("-", $appNameAsc)."/git/blob/development";
         // 2. 配置文件优选级
         $path = "{$this->basePath}/postman.json";
         if (file_exists($path)) {
