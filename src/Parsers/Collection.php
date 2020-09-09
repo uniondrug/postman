@@ -264,7 +264,7 @@ class Collection extends Base
         $data->description = $appName;
         $data->host = $appName;
         $data->sdk = $sdkClass;
-        $data->sdkPath = $sdkPath;
+        $data->sdkPath = $this->sdkPath($sdkPath);
         $data->sdkService = $appName;
         //$data->sdkLink = "https://uniondrug.coding.net/p/".implode(".", $appNameDesc)."/git/blob/development";;
         $data->sdkLink = "https://uniondrug.coding.net/p/".implode("-", $appNameAsc)."/git/blob/development";
@@ -282,6 +282,27 @@ class Collection extends Base
             }
         }
         return $data;
+    }
+
+    /**
+     * sdkPath 映射，兼容之前的路径和命名空间
+     * @param $sdkPath
+     * @return string
+     */
+    private function sdkPath($sdkPath)
+    {
+        switch ($sdkPath) {
+            case 'ps':
+                $sdkPath = 'module';
+                break;
+            case 'pm':
+                $sdkPath = 'backend';
+                break;
+            case 'px':
+                $sdkPath = 'union';
+                break;
+        }
+        return $sdkPath;
     }
 
     /**
