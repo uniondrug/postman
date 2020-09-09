@@ -255,9 +255,12 @@ class Collection extends Base
         ])) {
             $this->console->warning("应用名称在配置文件[config/app.php]中的[appName]字段值不合法, 必须以pm、ps、px 开头");
         }
+        /*$sdkClass = preg_replace_callback("/[\.|\-](\w)/", function($a){
+            return strtoupper($a[1]);
+        }, implode('.', $appNameArr));*/
         $sdkClass = preg_replace_callback("/[\.|\-](\w)/", function($a){
             return strtoupper($a[1]);
-        }, implode('.', $appNameArr));
+        }, implode('.', $appNameAsc));
         // 1.2 赋初始值
         $data->auth = "NO";
         $data->name = $appName;
@@ -299,7 +302,7 @@ class Collection extends Base
                 $sdkPath = 'backend';
                 break;
             case 'px':
-                $sdkPath = 'union';
+                $sdkPath = 'module';
                 break;
         }
         return $sdkPath;
