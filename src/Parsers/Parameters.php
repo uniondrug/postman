@@ -44,6 +44,7 @@ class Parameters
         'name' => '字段',
         'desc' => '描述'
     ];
+    private static $depth = [];
 
     /**
      * @param string $sn Struct Class Name
@@ -77,6 +78,13 @@ class Parameters
             $struct = new $cn([], false);
             $property = new Property($method, $struct, $p);
             if ($property->annotation->isStructType) {
+                if (!isset(self::$depth[$cn])) {
+                    self::$depth[$cn] = 0;
+                }
+                self::$depth[$cn]++;
+                if (self::$depth[$cn] >= 30) {
+                    break;
+                }
                 $this->children[$p->name] = new Parameters($method, $property->annotation->type, $reflect->getNamespaceName());
             }
             // 4.2 children
