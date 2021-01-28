@@ -307,7 +307,7 @@ class Collection extends Base
         $serv = \config()->path('server.host');
         if ($serv) {
             if (preg_match("/(\S+):(\d+)/", $serv, $m) > 0) {
-                $_serverPort = substr($m[2], 1);
+                $_serverPort = substr($m[2], -4);
             }
         }
         $exec = [];
