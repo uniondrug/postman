@@ -25,6 +25,9 @@ class Parameters
      * @var Parameters[]
      */
     public $children = [];
+    
+    public $childrenCount = [];
+    
     /**
      * @var Method
      */
@@ -76,11 +79,29 @@ class Parameters
             // 4.1 new Property
             $struct = new $cn([], false);
             $property = new Property($method, $struct, $p);
-            if ($property->annotation->isStructType) {
-                $this->children[$p->name] = new Parameters($method, $property->annotation->type, $reflect->getNamespaceName());
+            //自循环修改
+            if($p->name == 'children'){
+                if(key_exists($p->class,$this->childrenCount)){
+                    if ($property->annotation->isStructType) {
+                        $this->children[$p->name] = new Parameters($method, $property->annotation->type, $reflect->getNamespaceName(),$this->childrenCount);
+                    }
+                    // 4.2 children
+                    $this->properties[$p->name] = $property;
+                }else
+                {
+                    $this->childrenCount[$p->class] = 1;
+                }
+
+            }else{
+                if ($property->annotation->isStructType) {
+                    if(strpos($property->annotation->type,"StoreImages\AddStruct")){
+                        //var_dump($property->annotation->type,$reflect->getNamespaceName());exit();
+                    }
+                    $this->children[$p->name] = new Parameters($method, $property->annotation->type, $reflect->getNamespaceName(),$this->childrenCount);
+                }
+                // 4.2 children
+                $this->properties[$p->name] = $property;
             }
-            // 4.2 children
-            $this->properties[$p->name] = $property;
         }
     }
 
